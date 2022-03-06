@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  @layer responsive {
+    .p-inherit {
+      padding: inherit;
+    }
+    .min-h-inherit {
+      min-height: inherit;
+    }
+    .bg-inherit {
+      background: inherit;
+    }
+    .font-lato {
+      font-family: "Lato", sans-serif;
+    }
+    .grid-row-1 {
+      grid-row: 1;
+    }
+  }
+}
