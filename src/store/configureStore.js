@@ -1,4 +1,4 @@
-import { configureStore, getDefaultMiddleware } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import { persistStore } from "redux-persist";
 import logger from "redux-logger";
 import api from "./middleware/api";
