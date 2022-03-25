@@ -106,9 +106,31 @@ io.on("connection", (socket) => {
     console.log(messages[roomName]);
   });
 
+  // This is called whenever the host pdf page number changes, this change is
+  // then broadcasted to all other connected users
   socket.on("syncPages", (pageNumber) => {
     if (rooms[roomName]?.hostSocketId === socket.id) {
       socket.broadcast.to(roomName).emit("syncPages", pageNumber);
+    }
+  });
+
+  socket.on("startVideo", () => {
+    if (rooms[roomName]?.hostSocketId === socket.id) {
+      socket.broadcast.to(roomName).emit("startVideo");
+    }
+  });
+
+  socket.on("pauseVideo", () => {
+    if (rooms[roomName]?.hostSocketId === socket.id) {
+      socket.broadcast.to(roomName).emit("pauseVideo");
+    }
+  });
+
+  socket.on("syncVideo", (seconds) => {
+    if (rooms[roomName]?.hostSocketId === socket.id) {
+      socket.broadcast
+        .to(roomName)
+        .emit("updateVideoProgressTime", seconds + 1);
     }
   });
 

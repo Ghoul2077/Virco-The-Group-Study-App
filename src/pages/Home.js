@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLogin } from "../context/LoginProvider";
 
@@ -6,7 +6,6 @@ const Home = () => {
   const navigate = useNavigate();
   const { user, handleLogout } = useLogin();
   const [roomName, setRoomName] = useState(1);
-  const [username, setUsername] = useState("");
 
   return (
     <div

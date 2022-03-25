@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import socketIOClient from "socket.io-client";
 import PDF from "../components/PDF";
+import VideoPlayer from "../components/VideoPlayer";
 import { useLogin } from "../context/LoginProvider";
 
 const socket = socketIOClient(`http://localhost:4000`);
@@ -68,9 +69,10 @@ const Room = () => {
           <p key={index}>{username}</p>
         ))}
       </div>
+      <VideoPlayer socket={socket} />
       <PDF socket={socket} />
       <div>
-        <p>Chat</p>
+        <div>Chat</div>
         <div
           style={{
             height: "300px",

@@ -75,7 +75,6 @@ function PDF({ socket }) {
             onClick={() => setSynced((boolVal) => !boolVal)}
             style={{ marginLeft: "15px" }}
             type="button"
-            disabled={pageNumber >= numPages}
           >
             Sync : {synced ? "On" : "Off"}
           </button>
