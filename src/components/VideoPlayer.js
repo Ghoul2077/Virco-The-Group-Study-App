@@ -7,12 +7,19 @@ import ReactPlayer from "react-player";
 const VideoPlayer = ({ socket }) => {
   const playerRef = useRef(null);
   const [url, setUrl] = useState("https://www.youtube.com/watch?v=8FAUEv_E_xQ");
+  const [inputText, setInputText] = useState(url);
   const [playing, setPlaying] = useState(false);
+
+  function handleSubmit(event) {
+    setUrl(inputText);
+    event.preventDefault();
+  }
 
   useEffect(() => {
     if (socket && playerRef.current) {
       socket.on("updateVideoProgressTime", (seconds) => {
-        if (Math.abs(playerRef.current.getCurrentTime() - seconds) > 0.5) {
+        console.log(Math.abs(playerRef.current.getCurrentTime() - seconds));
+        if (Math.abs(playerRef.current.getCurrentTime() - seconds) > 0.25) {
           playerRef.current.seekTo(seconds);
         }
       });
@@ -21,6 +28,9 @@ const VideoPlayer = ({ socket }) => {
       });
       socket.on("startVideo", () => {
         setPlaying(true);
+      });
+      socket.on("updateVideoURL", (newURL) => {
+        setUrl(newURL);
       });
     }
   }, [socket, playerRef]);
@@ -45,16 +55,20 @@ const VideoPlayer = ({ socket }) => {
         progressInterval={1000}
         url={url}
       />
-      <div style={{ marginTop: "20px" }}>
+      <form
+        onSubmit={handleSubmit}
+        style={{ display: "flex", marginTop: "20px" }}
+      >
         <label htmlFor="url">URL : </label>
         <input
-          style={{ minWidth: "400px" }}
-          value={url}
-          onChange={(event) => setUrl(event.target.value)}
+          style={{ minWidth: "400px", marginRight: "5px" }}
+          value={inputText}
+          onChange={(event) => setInputText(event.target.value)}
           name="url"
           type="url"
         />
-      </div>
+        <button type="submit">Update</button>
+      </form>
     </div>
   );
 };

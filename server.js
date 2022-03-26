@@ -16,7 +16,7 @@ const io = new Server(server, {
 // Store users data as { room_name : { socket-id : username } }
 const users = {};
 // Store rooms data such as who is the admin of the room,
-// { room_name: { host: username, hostSocketId: socketId } }
+// { room_name: { host: username, hostSocketId: socketId, videoURL: "https://..." } }
 const rooms = {};
 // Store messages of each room as { room_name: [{ sender, msg }] }
 const messages = {};
@@ -73,6 +73,11 @@ io.on("connection", (socket) => {
     if (rooms[roomName] === undefined) {
       setHost(roomName, username, socket.id);
     }
+
+    if (Object.keys(users[roomName]) > 1) {
+      socket.emit("updateVideoURL", rooms[roomName]["videoURL"]);
+    }
+
     // Every new joinee needs to know who the current host is
     socket.emit("newHost", rooms[roomName].host);
 
@@ -128,9 +133,17 @@ io.on("connection", (socket) => {
 
   socket.on("syncVideo", (seconds) => {
     if (rooms[roomName]?.hostSocketId === socket.id) {
-      socket.broadcast
-        .to(roomName)
-        .emit("updateVideoProgressTime", seconds + 1);
+      socket.broadcast.to(roomName).emit("updateVideoProgressTime", seconds);
+    }
+  });
+
+  socket.on("updateVideoURL", (newUrl) => {
+    if (rooms[roomName]?.hostSocketId === socket.id) {
+      if (rooms[roomName] === undefined) {
+        rooms[roomName] = {};
+      }
+      rooms[roomName]["videoURL"] = newUrl;
+      socket.broadcast.to(roomName).emit("updateVideoURL", newUrl);
     }
   });
 
