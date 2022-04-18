@@ -1,0 +1,378 @@
+import {
+  Avatar,
+  Button,
+  CssBaseline,
+  Divider,
+  Grid,
+  IconButton,
+  Stack,
+  Toolbar,
+  Typography,
+} from "@mui/material";
+import MuiDrawer from "@mui/material/Drawer";
+import MuiAppBar from "@mui/material/AppBar";
+import { Box } from "@mui/system";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useLogin } from "../context/LoginProvider";
+import MenuIcon from "@mui/icons-material/Menu";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+
+import { styled, useTheme } from "@mui/material/styles";
+import Home from "../pages/Home";
+import CreateServer from "../pages/CreateServer";
+import JoinServer from "../pages/JoinServer";
+import EditIcon from "@mui/icons-material/Edit";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+
+const drawerWidth = 340;
+
+const openedMixin = (theme) => ({
+  width: drawerWidth,
+  transition: theme.transitions.create("width", {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.enteringScreen,
+  }),
+  overflowX: "hidden",
+});
+
+const closedMixin = (theme) => ({
+  transition: theme.transitions.create("width", {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  overflowX: "hidden",
+  width: `calc(${theme.spacing(7)} + 1px)`,
+  [theme.breakpoints.up("sm")]: {
+    width: `calc(${theme.spacing(8)} + 1px)`,
+  },
+});
+
+const DrawerHeader = styled("div")(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "flex-end",
+  padding: theme.spacing(0, 1),
+  // necessary for content to be below app bar
+  ...theme.mixins.toolbar,
+}));
+
+const AppBar = styled(MuiAppBar, {
+  shouldForwardProp: (prop) => prop !== "open",
+})(({ theme, open }) => ({
+  zIndex: theme.zIndex.drawer + 1,
+  transition: theme.transitions.create(["width", "margin"], {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  boxShadow: "none",
+  ...(open && {
+    marginLeft: drawerWidth,
+    width: `calc(100% - ${drawerWidth}px)`,
+    transition: theme.transitions.create(["width", "margin"], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+  }),
+}));
+
+const Drawer = styled(MuiDrawer, {
+  shouldForwardProp: (prop) => prop !== "open",
+})(({ theme, open }) => ({
+  width: drawerWidth,
+  flexShrink: 0,
+  whiteSpace: "nowrap",
+  boxSizing: "border-box",
+  ...(open && {
+    ...openedMixin(theme),
+    "& .MuiDrawer-paper": openedMixin(theme),
+  }),
+  ...(!open && {
+    ...closedMixin(theme),
+
+    "& .MuiDrawer-paper": closedMixin(theme),
+  }),
+}));
+
+const Navbar = ({ val }) => {
+  const navigate = useNavigate();
+  const { user, handleLogout } = useLogin();
+  const [roomName, setRoomName] = useState(1);
+
+  const theme = useTheme();
+  const [tab, setTab] = useState(1);
+  const [open, setOpen] = React.useState(true);
+  const [showServ, setShowServ] = useState(true);
+
+  const handleServer = () => {
+    setShowServ(!showServ);
+    val(showServ);
+  };
+  const handleDrawerOpen = () => {
+    setOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setOpen(false);
+  };
+
+  return (
+    <Box sx={{ display: "flex" }}>
+      <CssBaseline />
+      <AppBar
+        position="fixed"
+        style={{ backgroundColor: "#393E46" }}
+        open={open}
+      >
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            onClick={handleDrawerOpen}
+            edge="start"
+            sx={{
+              marginRight: 5,
+              ...(open && { display: "none" }),
+            }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Stack
+            spacing="3"
+            direction="row"
+            display="flex"
+            justifyContent="space-between"
+          >
+            <Box display="flex">
+              <Button
+                onClick={() => {
+                  setTab(1);
+                }}
+                variant="text"
+                style={{ color: "white" }}
+              >
+                Home
+              </Button>
+              <Button
+                onClick={() => {
+                  setTab(2);
+                }}
+                variant="text"
+                style={{ color: "white" }}
+              >
+                Create Server
+              </Button>
+              <Button
+                onClick={() => {
+                  setTab(3);
+                }}
+                variant="text"
+                style={{ color: "white" }}
+              >
+                Join Server
+              </Button>
+            </Box>
+
+            <Button
+              variant={showServ ? "contained" : "text"}
+              onClick={() => handleServer()}
+              style={{
+                color: "white",
+                marginLeft: `${open ? "40vw" : "60vw"}`,
+              }}
+            >
+              Your Servers
+            </Button>
+          </Stack>
+        </Toolbar>
+      </AppBar>
+      <Drawer
+        variant="permanent"
+        open={open}
+        PaperProps={{
+          sx: {
+            backgroundColor: "#393E46",
+            "&::-webkit-scrollbar": {
+              width: "0",
+              height: "0",
+            },
+          },
+        }}
+      >
+        <DrawerHeader style={{ backgroundColor: "#393E46" }}>
+          <IconButton onClick={handleDrawerClose}>
+            {theme.direction === "rtl" ? (
+              <ChevronRightIcon style={{ color: "white" }} />
+            ) : (
+              <ChevronLeftIcon style={{ color: "white" }} />
+            )}
+          </IconButton>
+        </DrawerHeader>
+        {/* <Divider /> */}
+        <Stack
+          direction="column"
+          height="60vh"
+          spacing={2}
+          sx={{ padding: "20px", overflow: "hidden" }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              direction: "row",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Box>
+              <Avatar
+                alt="Achal Jain"
+                src="/images/images.jpg"
+                sx={{
+                  bgcolor: "grey",
+                  border: "2px solid white",
+                  height: `${open ? "15vh" : "5vh"}`,
+                  width: `${open ? "15vh" : "5vh"}`,
+                  fontSize: `${open ? "4em" : "1em"}`,
+                }}
+              />
+            </Box>
+            {open && (
+              <Box sx={{ paddingLeft: "20px" }}>
+                <Stack>
+                  <Typography
+                    variant="h4"
+                    sx={{ fontWeight: "600", color: "white" }}
+                  >
+                    Achal Jain
+                  </Typography>
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: "600", color: "#10B9AE" }}
+                  >
+                    achal._.jain
+                  </Typography>
+                </Stack>
+              </Box>
+            )}
+          </Box>
+          {open ? (
+            <Button
+              variant="contained"
+              sx={{
+                bgcolor: "black",
+                width: "100%",
+                "&:hover": { bgcolor: "white", color: "black" },
+              }}
+            >
+              Edit Profile
+            </Button>
+          ) : (
+            <IconButton variant="contained">
+              <EditIcon
+                fontSize="small"
+                sx={{
+                  bgcolor: "black",
+                  color: "white",
+                  width: "5vh",
+                  height: "5vh",
+                  "&:hover": { bgcolor: "white", color: "black" },
+                  padding: "8px",
+                  borderRadius: "5px",
+                }}
+              />
+            </IconButton>
+          )}
+          {open ? (
+            <Button
+              variant="contained"
+              sx={{
+                bgcolor: "black",
+                width: "100%",
+                "&:hover": { bgcolor: "white", color: "black" },
+              }}
+            >
+              Logout
+            </Button>
+          ) : (
+            <IconButton variant="contained">
+              <ExitToAppIcon
+                fontSize="small"
+                sx={{
+                  bgcolor: "black",
+                  color: "white",
+                  width: "5vh",
+                  height: "5vh",
+                  "&:hover": { bgcolor: "white", color: "black" },
+                  padding: "8px",
+                  borderRadius: "5px",
+                }}
+              />
+            </IconButton>
+          )}
+        </Stack>
+        {open && (
+          <Typography
+            variant="h6"
+            padding="20px"
+            paddingBottom="10px"
+            color="white"
+          >
+            Recent Rooms
+          </Typography>
+        )}
+        {open && (
+          <Stack
+            padding="20px"
+            spacing={1}
+            overflow="auto"
+            sx={{
+              "&::-webkit-scrollbar": {
+                width: "0",
+                height: "0",
+              },
+            }}
+          >
+            <Button variant="outlined">Room 1</Button>
+            <Button variant="outlined">Room 1</Button>
+            <Button variant="outlined">Room 1</Button>
+            <Button variant="outlined">Room 1</Button>
+            <Button variant="outlined">Room 1</Button>
+            <Button variant="outlined">Room 1</Button>
+            <Button variant="outlined">Room 1</Button>
+            <Button variant="outlined">Room 1</Button>
+            <Button variant="outlined">Room 1</Button>
+            <Button variant="outlined">Room 1</Button>
+            <Button variant="outlined">Room 1</Button>
+            <Button variant="outlined">Room 1</Button>
+            <Button variant="outlined">Room 1</Button>
+          </Stack>
+        )}
+      </Drawer>
+      <Box component="main" sx={{ flexGrow: "1", p: 5 }}>
+        <DrawerHeader />
+        <img
+          src="/images/bg.png"
+          alt="background"
+          style={{
+            position: "fixed",
+            top: "0",
+            bottom: "0",
+            left: `${open ? "15%" : "0"}`,
+            // height: "100%",
+            width: "100%",
+            zIndex: "-1",
+            // maxHeight: "250px",
+            objectFit: "cover",
+            transition: "left 0.3s",
+          }}
+        />
+        {tab === 1 && <Home open={open} />}
+        {tab === 2 && <CreateServer open={open} />}
+        {tab === 3 && <JoinServer open={open} />}
+      </Box>
+    </Box>
+  );
+};
+
+export default Navbar;
