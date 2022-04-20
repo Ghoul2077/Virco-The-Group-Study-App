@@ -13,7 +13,7 @@ import MuiDrawer from "@mui/material/Drawer";
 import MuiAppBar from "@mui/material/AppBar";
 import { Box } from "@mui/system";
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useLogin } from "../context/LoginProvider";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -24,7 +24,11 @@ import Home from "../pages/Home";
 import CreateServer from "../pages/CreateServer";
 import JoinServer from "../pages/JoinServer";
 import EditIcon from "@mui/icons-material/Edit";
+import HomeIcon from "@mui/icons-material/Home";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import MessageIcon from "@mui/icons-material/Message";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
 
 const drawerWidth = 340;
 
@@ -95,15 +99,19 @@ const Drawer = styled(MuiDrawer, {
   }),
 }));
 
-const Navbar = ({ val }) => {
-  const navigate = useNavigate();
+const Navbar = ({ val, openParent, tabParent, room }) => {
+  let navigate = useNavigate();
   const { user, handleLogout } = useLogin();
-  const [roomName, setRoomName] = useState(1);
 
   const theme = useTheme();
   const [tab, setTab] = useState(1);
   const [open, setOpen] = React.useState(true);
   const [showServ, setShowServ] = useState(true);
+
+  useEffect(() => {
+    openParent(open);
+    tabParent(tab);
+  }, [open, tab]);
 
   const handleServer = () => {
     setShowServ(!showServ);
@@ -116,6 +124,18 @@ const Navbar = ({ val }) => {
   const handleDrawerClose = () => {
     setOpen(false);
   };
+
+  const navList = [
+    { val: 1, name: "Home" },
+    { val: 2, name: "Crete Server" },
+    { val: 3, name: "Join Server" },
+  ];
+
+  const channels = [
+    { name: "Text Channel 1", Icon: MessageIcon, url: "text" },
+    { name: "Video Channel 1", Icon: VideoLibraryIcon, url: "video" },
+    { name: "Pdf Channel 1", Icon: PictureAsPdfIcon, url: "pdf" },
+  ];
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -144,46 +164,44 @@ const Navbar = ({ val }) => {
             display="flex"
             justifyContent="space-between"
           >
-            <Box display="flex">
-              <Button
-                onClick={() => {
-                  setTab(1);
-                }}
-                variant="text"
-                style={{ color: "white" }}
-              >
-                Home
-              </Button>
-              <Button
-                onClick={() => {
-                  setTab(2);
-                }}
-                variant="text"
-                style={{ color: "white" }}
-              >
-                Create Server
-              </Button>
-              <Button
-                onClick={() => {
-                  setTab(3);
-                }}
-                variant="text"
-                style={{ color: "white" }}
-              >
-                Join Server
-              </Button>
-            </Box>
+            {room ? (
+              <Stack direction="row" alignItems={"center"}>
+                <IconButton onClick={() => navigate("/")}>
+                  <HomeIcon sx={{ color: "white", fontSize: "30px" }} />
+                </IconButton>
+                <Typography paddingTop={"7px"} fontSize="20px">
+                  {room}
+                </Typography>
+              </Stack>
+            ) : (
+              <>
+                <Box display="flex">
+                  {navList.map((item, index) => (
+                    <Button
+                      key={index}
+                      onClick={() => {
+                        setTab(item.val);
+                      }}
+                      variant="text"
+                      style={{ color: "white" }}
+                    >
+                      {item.name}
+                    </Button>
+                  ))}
+                </Box>
 
-            <Button
-              variant={showServ ? "contained" : "text"}
-              onClick={() => handleServer()}
-              style={{
-                color: "white",
-                marginLeft: `${open ? "40vw" : "60vw"}`,
-              }}
-            >
-              Your Servers
-            </Button>
+                <Button
+                  variant={showServ ? "contained" : "text"}
+                  onClick={() => handleServer()}
+                  style={{
+                    color: "white",
+                    marginLeft: `${open ? "40vw" : "60vw"}`,
+                  }}
+                >
+                  Your Servers
+                </Button>
+              </>
+            )}
           </Stack>
         </Toolbar>
       </AppBar>
@@ -212,7 +230,7 @@ const Navbar = ({ val }) => {
         {/* <Divider /> */}
         <Stack
           direction="column"
-          height="60vh"
+          height={room ? null : "60vh"}
           spacing={2}
           sx={{ padding: "20px", overflow: "hidden" }}
         >
@@ -244,7 +262,7 @@ const Navbar = ({ val }) => {
                     variant="h4"
                     sx={{ fontWeight: "600", color: "white" }}
                   >
-                    Achal Jain
+                    {user?.displayName}
                   </Typography>
                   <Typography
                     variant="h6"
@@ -286,6 +304,7 @@ const Navbar = ({ val }) => {
           {open ? (
             <Button
               variant="contained"
+              onClick={handleLogout}
               sx={{
                 bgcolor: "black",
                 width: "100%",
@@ -295,7 +314,7 @@ const Navbar = ({ val }) => {
               Logout
             </Button>
           ) : (
-            <IconButton variant="contained">
+            <IconButton variant="contained" onClick={handleLogout}>
               <ExitToAppIcon
                 fontSize="small"
                 sx={{
@@ -318,10 +337,10 @@ const Navbar = ({ val }) => {
             paddingBottom="10px"
             color="white"
           >
-            Recent Rooms
+            {room ? "Channels" : "Recent Rooms"}
           </Typography>
         )}
-        {open && (
+        {open && !room && (
           <Stack
             padding="20px"
             spacing={1}
@@ -348,29 +367,48 @@ const Navbar = ({ val }) => {
             <Button variant="outlined">Room 1</Button>
           </Stack>
         )}
+        {room && (
+          <Stack
+            padding="0 20px"
+            spacing={1}
+            overflow="auto"
+            justifyContent={"flex-start"}
+            sx={{
+              "&::-webkit-scrollbar": {
+                width: "0",
+                height: "0",
+              },
+            }}
+          >
+            {channels.map(({ name, Icon, url }, index) => (
+              <IconButton
+                variant="contained"
+                key={index}
+                sx={{
+                  bgcolor: `${open ? "#505762" : null}`,
+                  borderRadius: `${open ? "10px" : "0"}`,
+                  "&:hover": { bgcolor: `${open ? "#505762" : null}` },
+                }}
+                onClick={() => navigate(`/${room}/${url}`)}
+              >
+                <Icon
+                  fontSize="small"
+                  sx={{
+                    bgcolor: "#505762",
+                    color: "white",
+                    width: "5vh",
+                    height: "5vh",
+                    //   "&:hover": { bgcolor: "white", color: "black" },
+                    padding: "8px",
+                    borderRadius: "5px",
+                  }}
+                />
+                {open && <Typography color={"white"}>{name}</Typography>}
+              </IconButton>
+            ))}
+          </Stack>
+        )}
       </Drawer>
-      <Box component="main" sx={{ flexGrow: "1", p: 5 }}>
-        <DrawerHeader />
-        <img
-          src="/images/bg.png"
-          alt="background"
-          style={{
-            position: "fixed",
-            top: "0",
-            bottom: "0",
-            left: `${open ? "15%" : "0"}`,
-            // height: "100%",
-            width: "100%",
-            zIndex: "-1",
-            // maxHeight: "250px",
-            objectFit: "cover",
-            transition: "left 0.3s",
-          }}
-        />
-        {tab === 1 && <Home open={open} />}
-        {tab === 2 && <CreateServer open={open} />}
-        {tab === 3 && <JoinServer open={open} />}
-      </Box>
     </Box>
   );
 };
