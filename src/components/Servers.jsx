@@ -14,7 +14,7 @@ function Servers({ val, room }) {
     width: `${room ? "100%" : "80%"}`,
     height: `${val ? "0px" : "70px"}`,
     background: "#D2D5D8",
-    // display: "flex",
+    display: "flex",
     justifyContent: "center",
     //   alignItems: "center",
     overflowX: "scroll",
@@ -30,7 +30,12 @@ function Servers({ val, room }) {
     <Box sx={{ display: "flex", justifyContent: "center" }}>
       <ServerList>
         {/* <Typography sx={{ fontSize: "60px" }}>servers</Typography> */}
-        <Stack direction="row" width={`${room ? null : "80%"}`}>
+        <Stack
+          direction="row"
+          display={"flex"}
+          justifyContent="center"
+          width={`${room ? null : "80%"}`}
+        >
           {list.map((name) => (
             <IconButton key={name} onClick={() => navigate(`/${name}`)}>
               <Avatar
