@@ -50,6 +50,7 @@ function JoinServer({ open }) {
             }}
           />
           <Button
+            type="submit"
             variant="contained"
             sx={{
               width: `${open ? "5vw" : "10vw"}`,

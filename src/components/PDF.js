@@ -1,3 +1,4 @@
+import { Button } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Document, Page } from "react-pdf/dist/esm/entry.webpack";
 
@@ -37,7 +38,12 @@ function PDF({ socket }) {
 
   return (
     <div
-      style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        marginRight: "10vw",
+      }}
     >
       <Document
         onLoadSuccess={onDocumentLoadSuccess}
@@ -56,28 +62,52 @@ function PDF({ socket }) {
           Page {pageNumber || (numPages ? 1 : "--")} of {numPages || "--"}
         </p>
         <div style={{ display: "flex" }}>
-          <button
+          <Button
             style={{ marginRight: "15px" }}
             type="button"
             disabled={pageNumber <= 1}
             onClick={previousPage}
+            sx={{
+              height: "40px",
+              borderRadius: "5px",
+              fontSize: "15px",
+              backgroundColor: "#10B9AE",
+              "&:hover": { bgcolor: "#3D6974" },
+              color: "white",
+            }}
           >
             Previous
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             disabled={pageNumber >= numPages}
             onClick={nextPage}
+            sx={{
+              height: "40px",
+              borderRadius: "5px",
+              fontSize: "15px",
+              backgroundColor: "#10B9AE",
+              "&:hover": { bgcolor: "#3D6974" },
+              color: "white",
+            }}
           >
             Next
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => setSynced((boolVal) => !boolVal)}
             style={{ marginLeft: "15px" }}
             type="button"
+            sx={{
+              height: "40px",
+              borderRadius: "5px",
+              fontSize: "15px",
+              backgroundColor: "#10B9AE",
+              "&:hover": { bgcolor: "#3D6974" },
+              color: "white",
+            }}
           >
             Sync : {synced ? "On" : "Off"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

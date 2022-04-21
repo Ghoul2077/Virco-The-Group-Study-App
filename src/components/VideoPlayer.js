@@ -1,12 +1,15 @@
+import { TextField, Typography } from "@mui/material";
 import React from "react";
 import { useEffect } from "react";
 import { useRef } from "react";
 import { useState } from "react";
 import ReactPlayer from "react-player";
 
-const VideoPlayer = ({ socket }) => {
+const VideoPlayer = ({ socket, open }) => {
   const playerRef = useRef(null);
-  const [url, setUrl] = useState("https://www.youtube.com/watch?v=8FAUEv_E_xQ");
+  const [url, setUrl] = useState(
+    "https://www.youtube.com/watch?v=y17RuWkWdn8&ab_channel=WebDevSimplified"
+  );
   const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
@@ -32,8 +35,16 @@ const VideoPlayer = ({ socket }) => {
   }, [socket, url]);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        paddingLeft: `${open ? "3vw" : "5vw"}`,
+      }}
+    >
       <ReactPlayer
+        height={"60vh"}
+        width={open ? "50vw" : "62vw"}
         playing={playing}
         ref={playerRef}
         controls={true}
@@ -46,13 +57,32 @@ const VideoPlayer = ({ socket }) => {
         url={url}
       />
       <div style={{ marginTop: "20px" }}>
-        <label htmlFor="url">URL : </label>
-        <input
-          style={{ minWidth: "400px" }}
-          value={url}
-          onChange={(event) => setUrl(event.target.value)}
+        <Typography htmlFor="url" color="white">
+          URL :
+        </Typography>
+        <TextField
           name="url"
           type="url"
+          value={url}
+          onChange={(event) => setUrl(event.target.value)}
+          required
+          InputProps={{
+            sx: {
+              color: "white",
+            },
+          }}
+          sx={{
+            backgroundColor: "black",
+            width: `${open ? "50vw" : "62vw"}`,
+            //   transition: "width 0.3s",
+            borderRadius: "5px 0 0 5px",
+            fontSize: "30px",
+            fontWeight: "800",
+            opacity: "50%",
+
+            // marginBottom: "15vh",
+            //   height: "70px",
+          }}
         />
       </div>
     </div>

@@ -1,4 +1,12 @@
-import { Stack, Typography } from "@mui/material";
+import {
+  Avatar,
+  Button,
+  Divider,
+  IconButton,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { Box } from "@mui/system";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -9,17 +17,21 @@ import PDF from "../components/PDF";
 import Servers from "../components/Servers";
 import VideoPlayer from "../components/VideoPlayer";
 import { useLogin } from "../context/LoginProvider";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 
 const socket = socketIOClient(`http://localhost:4000`);
+// window.scrollTo(0, document.getElementById("scrollingContainer").scrollHeight);
 
 const Room = ({ open }) => {
   const { user } = useLogin();
   const { room } = useParams();
   let location = useLocation();
+  const [path, setPath] = useState();
 
   useEffect(() => {
-    console.log(room);
-  }, [room]);
+    setPath(location.pathname.split("/")[2]);
+  }, [location]);
 
   const [msg, setMsg] = useState("");
   const [messages, setMessages] = useState([]);
@@ -27,13 +39,15 @@ const Room = ({ open }) => {
   const [host, setHost] = useState("");
 
   function handleSend(event) {
-    socket.emit(
-      "sendMessage",
-      {
-        message: msg,
-      },
-      () => setMsg("")
-    );
+    if (msg !== "") {
+      socket.emit(
+        "sendMessage",
+        {
+          message: msg,
+        },
+        () => setMsg("")
+      );
+    }
     event.preventDefault();
   }
 
@@ -111,17 +125,208 @@ const Room = ({ open }) => {
             </Typography>
           ))}
         </Stack>
+        <Divider sx={{ color: "white" }} />
       </Box>
       <Box
         component="main"
         sx={{
           flexGrow: "1",
           p: "100px",
-          paddingLeft: `${open ? "380px" : "100px"}`,
+          paddingLeft: `${open ? "360px" : "90px"}`,
           bgcolor: "#556270",
-          height: "100vh",
+          height: `${path === "pdf" ? "100%" : "100vh"}`,
         }}
-      ></Box>
+      >
+        {/*---------- text channel------------- */}
+        <div
+          style={{
+            display: `${
+              path === undefined || path === "text" ? "inherit" : "none"
+            }`,
+          }}
+        >
+          <Box
+            sx={{
+              position: "fixed",
+              height: "70%",
+              overflowY: "auto",
+              width: `${open ? "55vw" : "72vw"}`,
+              bottom: "20vh",
+              "&::-webkit-scrollbar": {
+                width: "0",
+                height: "0",
+              },
+              // display: "flex",
+              // flexDirection: "column-reverse",
+            }}
+          >
+            {messages.map(({ sender, message }, index) => (
+              <Stack
+                alignItems={"center"}
+                padding="8px"
+                direction={"row"}
+                key={index}
+              >
+                <Avatar
+                  sx={{ height: "40px", width: "40px" }}
+                  src="/broken-image.jpg"
+                />
+                <Stack direction={"column"} paddingLeft="10px">
+                  <Typography color={"white"} sx={{ fontSize: "12px" }}>
+                    {sender}
+                  </Typography>
+                  <Typography
+                    color={"white"}
+                    sx={{ fontSize: "16px", fontWeight: "300" }}
+                  >
+                    {message}
+                  </Typography>
+                </Stack>
+              </Stack>
+            ))}
+          </Box>
+          <Stack
+            alignItems={"center"}
+            direction={"row"}
+            sx={{ bottom: "12vh", position: "fixed" }}
+          >
+            <form>
+              <TextField
+                placeholder="Type your message here"
+                value={msg}
+                onChange={(event) => setMsg(event.target.value)}
+                required
+                InputProps={{
+                  sx: {
+                    color: "white",
+                  },
+                }}
+                sx={{
+                  backgroundColor: "black",
+                  width: `${open ? "50vw" : "62vw"}`,
+                  //   transition: "width 0.3s",
+                  borderRadius: "5px 0 0 5px",
+                  fontSize: "30px",
+                  fontWeight: "800",
+                  opacity: "50%",
+
+                  // marginBottom: "15vh",
+                  //   height: "70px",
+                }}
+              />
+              <Button
+                variant="contained"
+                onClick={handleSend}
+                type="submit"
+                sx={{
+                  width: `${open ? "5vw" : "10vw"}`,
+                  height: "55px",
+                  borderRadius: "0 5px 5px 0",
+                  fontSize: "15px",
+                  backgroundColor: "#10B9AE",
+                  "&:hover": { bgcolor: "#3D6974" },
+                }}
+              >
+                Send
+              </Button>
+            </form>
+          </Stack>
+        </div>
+        {/*---------- text channel------------- */}
+
+        {/*---------- video channel------------ */}
+        <div
+          style={{
+            display: `${path === "video" ? "inherit" : "none"}`,
+          }}
+        >
+          <VideoPlayer socket={socket} open={open} />
+        </div>
+        {/*---------- video channel------------ */}
+
+        {/*----------- PDF channel------------ */}
+        <div
+          style={{
+            display: `${path === "pdf" ? "inherit" : "none"}`,
+          }}
+        >
+          <Typography color={"white"} variant="h5" paddingBottom={"10px"}>
+            Add PDF
+          </Typography>
+
+          <IconButton sx={{ "&:hover": { borderRadius: "10px" } }}>
+            <Box
+              sx={{
+                width: `${open ? "52vw" : "72vw"}`,
+                border: "2px dashed white",
+                display: "flex",
+                justifyContent: "center",
+                borderRadius: "10px",
+                padding: "20px",
+              }}
+            >
+              <AddCircleIcon sx={{ color: "white", fontSize: "50px" }} />
+            </Box>
+          </IconButton>
+          <Typography
+            color={"white"}
+            variant="h5"
+            paddingBottom={"10px"}
+            paddingTop={"10px"}
+          >
+            Select PDF
+          </Typography>
+          <Stack
+            direction={"row"}
+            sx={{
+              backgroundColor: "#393E46",
+              width: `${open ? "52vw" : "72vw"}`,
+              padding: "10px",
+              borderRadius: "10px",
+              "&::-webkit-scrollbar": {
+                width: "0",
+                height: "0",
+              },
+              overflowX: "auto",
+            }}
+          >
+            <PictureAsPdfIcon
+              sx={{ color: "white", fontSize: "50px", paddingLeft: "10px" }}
+            />
+            <PictureAsPdfIcon
+              sx={{ color: "white", fontSize: "50px", paddingLeft: "10px" }}
+            />
+            <PictureAsPdfIcon
+              sx={{ color: "white", fontSize: "50px", paddingLeft: "10px" }}
+            />
+            <PictureAsPdfIcon
+              sx={{ color: "white", fontSize: "50px", paddingLeft: "10px" }}
+            />
+            <PictureAsPdfIcon
+              sx={{ color: "white", fontSize: "50px", paddingLeft: "10px" }}
+            />
+            <PictureAsPdfIcon
+              sx={{ color: "white", fontSize: "50px", paddingLeft: "10px" }}
+            />
+            <PictureAsPdfIcon
+              sx={{ color: "white", fontSize: "50px", paddingLeft: "10px" }}
+            />
+            <PictureAsPdfIcon
+              sx={{ color: "white", fontSize: "50px", paddingLeft: "10px" }}
+            />
+            <PictureAsPdfIcon
+              sx={{ color: "white", fontSize: "50px", paddingLeft: "10px" }}
+            />
+            <PictureAsPdfIcon
+              sx={{ color: "white", fontSize: "50px", paddingLeft: "10px" }}
+            />
+          </Stack>
+          <div style={{ paddingTop: "50px" }}>
+            <PDF socket={socket} />
+          </div>
+        </div>
+        {/*----------- PDF channel------------ */}
+      </Box>
       <Servers room={true} />
     </div>
     // <div style={{ display: "flex", padding: "100px" }}>

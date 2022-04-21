@@ -3,38 +3,7 @@ import { Avatar, Box, IconButton, Stack, Typography } from "@mui/material";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const list = [
-  "A",
-  "B",
-  "C",
-  "D",
-  "E",
-  "F",
-  "G",
-  "H",
-  "I",
-  "J",
-  "A",
-  "B",
-  "C",
-  "D",
-  "E",
-  "F",
-  "G",
-  "H",
-  "I",
-  "J",
-  "A",
-  "B",
-  "C",
-  "D",
-  "E",
-  "F",
-  "G",
-  "H",
-  "I",
-  "J",
-];
+const list = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
 
 function Servers({ val, room }) {
   const ServerList = styled("div")(({ theme }) => ({
