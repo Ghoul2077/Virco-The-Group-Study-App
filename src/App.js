@@ -4,7 +4,7 @@ import Navbar from "./components/Navbar";
 import { useLogin } from "./context/LoginProvider";
 import Dashboard from "./pages/Dashboard";
 import Home from "./pages/Home";
-import Login from "./pages/Login";
+import LoginPage from "./pages/LoginPage";
 import Room from "./pages/Room";
 
 function App() {
@@ -32,7 +32,7 @@ function App() {
   }
 
   if (!user) {
-    return <Login />;
+    return <LoginPage />;
   }
 
   return (
