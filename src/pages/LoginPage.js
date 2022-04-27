@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import { useLogin } from "../context/LoginProvider";
-import Joi from "joi-browser";
-import Login from "../components/login";
-import { Button, Grid, Stack, TextField, Typography } from "@mui/material";
-// import { useHistory } from "react-router-dom";
+import { Button, Stack, TextField, Typography } from "@mui/material";
 
 const LoginPage = () => {
   const { handleLoginWithEmail } = useLogin();
