@@ -73,6 +73,7 @@ io.on("connection", (socket) => {
     if (rooms[roomName] === undefined) {
       setHost(roomName, username, socket.id);
     }
+	
     // Every new joinee needs to know who the current host is
     socket.emit("newHost", rooms[roomName].host);
 
@@ -105,6 +106,12 @@ io.on("connection", (socket) => {
     if (callback) callback();
     console.log(messages[roomName]);
   });
+  
+  socket.on("getMessages", () => {
+	if (messages[roomName] !== undefined) {
+	  socket.emit("messagesBroadcast", messages[roomName]);
+    } 
+  })
 
   // This is called whenever the host pdf page number changes, this change is
   // then broadcasted to all other connected users
@@ -146,6 +153,6 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(4000, () => {
+server.listen(process.env.PORT || 4000, () => {
   console.log("listening on *:4000");
 });
