@@ -3,11 +3,12 @@ import { Avatar, Box, IconButton, Stack, Typography } from "@mui/material";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const list = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+const list = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P"];
 
 function Servers({ val, room }) {
   const ServerList = styled("div")(({ theme }) => ({
     zIndex: `${room ? null : "999999999"}`,
+    maxWidth: "800px",
     position: "fixed",
     padding: "0px 10px 0px 10px",
     bottom: "0",
@@ -15,7 +16,7 @@ function Servers({ val, room }) {
     height: `${val ? "0px" : "70px"}`,
     background: "#D2D5D8",
     display: "flex",
-    justifyContent: "center",
+    justifyContent: "start",
     //   alignItems: "center",
     overflowX: "scroll",
     borderRadius: "10px 10px 0px 0px",
@@ -23,7 +24,6 @@ function Servers({ val, room }) {
       width: "0",
       height: "0",
     },
-    paddingLeft: `${room ? "5vw" : null}`,
   }));
   const navigate = useNavigate();
   return (
@@ -33,7 +33,7 @@ function Servers({ val, room }) {
         <Stack
           direction="row"
           display={"flex"}
-          justifyContent="center"
+          justifyContent="start"
           width={`${room ? null : "80%"}`}
         >
           {list.map((name) => (
