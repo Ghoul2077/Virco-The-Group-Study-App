@@ -52,6 +52,9 @@ const Room = ({ open }) => {
   }
 
   useEffect(() => {
+    setMsg("");
+    setMessages([]);
+    
     socket.emit("joinRoom", { roomId: room, username: user.displayName });
 
     socket.on("newJoinee", (username) =>
@@ -72,7 +75,8 @@ const Room = ({ open }) => {
     });
 
     return () => {
-      socket.emit("leaveRoom", socket.removeAllListeners);
+      socket.removeAllListeners();
+      socket.emit("leaveRoom");
     };
   }, [room, user.displayName]);
 
