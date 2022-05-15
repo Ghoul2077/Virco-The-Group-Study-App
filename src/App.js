@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import UserAndRoomValidator from "./components/UserAndRoomValidator";
 import { useLogin } from "./context/LoginProvider";
 import Dashboard from "./pages/Dashboard";
 import Home from "./pages/Home";
@@ -50,7 +51,7 @@ function App() {
           path="/"
           element={<Dashboard showList={showList} open={open} tab={tab} />}
         />
-        <Route path="/:room" element={<Room open={open} />} />
+        <Route path="/:room" element={<UserAndRoomValidator open={open} />} />
         <Route path="/:room/:channel" element={<Room open={open} />} />
       </Routes>
     </div>
