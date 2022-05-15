@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
+import Messages from "./components/Messages";
 import Navbar from "./components/Navbar";
+import PDF from "./components/PDF";
 import UserAndRoomValidator from "./components/UserAndRoomValidator";
+import VideoPlayer from "./components/VideoPlayer";
 import { useLogin } from "./context/LoginProvider";
 import Dashboard from "./pages/Dashboard";
-import Home from "./pages/Home";
 import LoginPage from "./pages/LoginPage";
-import Room from "./pages/Room";
 
 function App() {
   const { user, isLoading } = useLogin();
@@ -51,8 +52,15 @@ function App() {
           path="/"
           element={<Dashboard showList={showList} open={open} tab={tab} />}
         />
-        <Route path="/:room" element={<UserAndRoomValidator open={open} />} />
-        <Route path="/:room/:channel" element={<Room open={open} />} />
+        <Route path="/:room" element={<UserAndRoomValidator open={open} />}>
+          <Route path="text" element={<Messages open={open} />} />
+          <Route path="video" element={<VideoPlayer open={open} />} />
+          <Route path="pdf" element={<PDF open={open} />} />
+          <Route
+            path=""
+            element={<Navigate to="text" />}
+          />
+        </Route>
       </Routes>
     </div>
   );

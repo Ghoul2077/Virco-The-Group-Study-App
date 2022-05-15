@@ -4,12 +4,14 @@ import { useEffect } from "react";
 import { useRef } from "react";
 import { useState } from "react";
 import ReactPlayer from "react-player";
+import { useOutletContext } from "react-router-dom";
 
-const VideoPlayer = ({ socket, open }) => {
+const VideoPlayer = ({ open }) => {
   const playerRef = useRef(null);
   const [url, setUrl] = useState(
     "https://www.youtube.com/watch?v=y17RuWkWdn8&ab_channel=WebDevSimplified"
-  );
+    );
+    const { socket } = useOutletContext();
   const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
