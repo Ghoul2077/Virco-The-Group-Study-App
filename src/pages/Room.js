@@ -8,7 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Box } from "@mui/system";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import socketIOClient from "socket.io-client";
@@ -28,6 +28,7 @@ const Room = ({ open }) => {
   const { room } = useParams();
   let location = useLocation();
   const [path, setPath] = useState();
+  const messageBoxRef = useRef(null);
 
   useEffect(() => {
     setPath(location.pathname.split("/")[2]);
@@ -72,6 +73,7 @@ const Room = ({ open }) => {
 
     socket.on("messagesBroadcast", (messages) => {
       setMessages(messages);
+      messageBoxRef.current?.scrollTo(0, messageBoxRef.current?.scrollHeight);
     });
 
     return () => {
@@ -150,6 +152,7 @@ const Room = ({ open }) => {
           }}
         >
           <Box
+            ref={messageBoxRef}
             sx={{
               position: "fixed",
               height: "70%",
