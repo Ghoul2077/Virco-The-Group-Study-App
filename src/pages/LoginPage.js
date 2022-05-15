@@ -3,7 +3,11 @@ import { useLogin } from "../context/LoginProvider";
 import { Button, Stack, TextField, Typography } from "@mui/material";
 
 const LoginPage = () => {
-  const { handleLoginWithEmail } = useLogin();
+  const { handleLoginWithEmail, handleSignupWithEmailAndPassword } = useLogin();
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupName, setSignupName] = useState("");
+  const [signupUsername, setSignupUsername] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [signUp, setSignUp] = useState(false);
@@ -52,13 +56,13 @@ const LoginPage = () => {
             marginTop: "5vh",
           }}
           onSubmit={(event) => {
-            handleLoginWithEmail({ email, password });
+            handleSignupWithEmailAndPassword({ email: signupEmail, password: signupPassword, name: signupName, username: signupUsername });
             event.preventDefault();
           }}
         >
           <Typography
             color={"white"}
-            variant="h2"
+            variant="h4"
             fontWeight={"600"}
             paddingBottom="30px"
           >
@@ -70,7 +74,7 @@ const LoginPage = () => {
           </Typography>
 
           <TextField
-            // onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => setSignupEmail(e.target.value)}
             placeholder="Email"
             InputProps={{
               sx: { color: "black" },
@@ -80,6 +84,23 @@ const LoginPage = () => {
             id="email"
             name="email"
             type="email"
+          />
+
+          <Typography color={"white"} variant="h6" paddingBottom={"10px"}>
+            Name
+          </Typography>
+
+          <TextField
+            onChange={(e) => setSignupName(e.target.value)}
+            placeholder="Name"
+            InputProps={{
+              sx: { color: "black" },
+            }}
+            sx={{ bgcolor: "white", borderRadius: "5px" }}
+            size="small"
+            id="name"
+            name="name"
+            type="name"
           />
           <Typography
             color={"white"}
@@ -91,7 +112,7 @@ const LoginPage = () => {
           </Typography>
 
           <TextField
-            // onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => setSignupUsername(e.target.value)}
             placeholder="Username"
             InputProps={{
               sx: { color: "black" },
@@ -110,7 +131,7 @@ const LoginPage = () => {
             Password
           </Typography>
           <TextField
-            // onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => setSignupPassword(e.target.value)}
             placeholder="Password"
             InputProps={{
               sx: { color: "black" },

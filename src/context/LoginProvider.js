@@ -1,6 +1,7 @@
+import toast from "react-hot-toast";
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { onAuthStateChanged, signInWithEmailAndPassword } from "@firebase/auth";
-import { doc, onSnapshot } from "@firebase/firestore";
+import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification } from "@firebase/auth";
+import { doc, onSnapshot, setDoc } from "@firebase/firestore";
 import { auth, firestore } from "../config/firebase";
 
 export const LoginContext = createContext(null);
@@ -24,9 +25,36 @@ export const LoginProvider = ({ children }) => {
     setTimeout(() => auth.signOut(), 50);
   }
 
+  async function handleSignupWithEmailAndPassword({ email, password, name, username }) {
+    setAuthChanging(true);
+    
+    try {
+      const { user } = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      await sendEmailVerification(user);
+      const userDataDoc = doc(firestore, "users", user?.uid);
+      await setDoc(userDataDoc, {
+        displayName: name,
+        username: username,
+      });
+    } catch({ message }) {
+      toast.error(message);
+    }
+
+    setAuthChanging(false);
+  }
+
   useEffect(() => {
     const cleanup = onAuthStateChanged(auth, async (user) => {
-      if (user != null) {
+      if (user != null && !user.emailVerified) {
+        toast.success(
+          user.email + " please check your inbox for verification mail"
+        );
+        auth.signOut();
+      } else if (user != null && user.emailVerified) {
         let userData = Object.assign({}, user.providerData[0]);
 
         onSnapshot(doc(firestore, "users", user.uid), (firestoreData) => {
@@ -51,6 +79,7 @@ export const LoginProvider = ({ children }) => {
       value={{
         handleLogout,
         handleLoginWithEmail,
+        handleSignupWithEmailAndPassword,
         isLoading: authChanging,
         user,
       }}
