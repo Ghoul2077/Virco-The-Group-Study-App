@@ -268,7 +268,7 @@ const Navbar = ({ val, openParent, tabParent, room }) => {
                     variant="h6"
                     sx={{ fontWeight: "600", color: "#10B9AE" }}
                   >
-                    achal._.jain
+                    {user?.username}
                   </Typography>
                 </Stack>
               </Box>
