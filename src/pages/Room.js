@@ -20,7 +20,7 @@ import { useLogin } from "../context/LoginProvider";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 
-const socket = socketIOClient(`http://localhost:4000`);
+const socket = socketIOClient(`https://group-study-app.herokuapp.com`);
 // window.scrollTo(0, document.getElementById("scrollingContainer").scrollHeight);
 
 const Room = ({ open }) => {
