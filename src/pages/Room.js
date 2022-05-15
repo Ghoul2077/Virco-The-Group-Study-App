@@ -54,6 +54,7 @@ const Room = ({ open }) => {
 
   useEffect(() => {
     setMsg("");
+    setHost("");
     setMessages([]);
     
     socket.emit("joinRoom", { roomId: room, username: user.displayName });
