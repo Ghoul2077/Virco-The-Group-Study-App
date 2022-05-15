@@ -101,7 +101,7 @@ const Room = ({ open }) => {
           p: "100px",
           paddingLeft: `${open ? "360px" : "90px"}`,
           bgcolor: "#556270",
-          height: `${path === "pdf" ? "100%" : "100vh"}`,
+          minHeight: "100vh",
         }}
       >
           <div style={{ display: "inherit" }} >
