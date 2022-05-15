@@ -1,8 +1,36 @@
-import { Box, Button, Stack, TextField, Typography } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Box, Button, CircularProgress, Stack, TextField, Typography } from "@mui/material";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { firestore } from "../config/firebase";
+import toast from "react-hot-toast";
 
 function JoinServer({ open }) {
   const [link, setLink] = useState("");
+  const [firebaseQuery, setFirebaseQuery] = useState(false);
+  const [isQuerying, setIsQuerying] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if(firebaseQuery) {
+      setIsQuerying(true);
+  
+      (async function() {
+        const communitiesRef = collection(firestore, "communities");
+        const q = query(communitiesRef, where("community_name", "==", firebaseQuery));
+        const querySnapshot = await getDocs(q);
+        if(querySnapshot.docs.length > 0) {
+          navigate(`/${link}`);
+        } else {
+          toast.error("Server does not exist");
+        }
+      })()
+  
+      setIsQuerying(false);
+      setFirebaseQuery("");
+    }
+  }, [firebaseQuery])
+
   return (
     <Box>
       <Box
@@ -22,7 +50,12 @@ function JoinServer({ open }) {
       <Typography variant="h5" paddingTop={"50px"} color="white">
         Use Link Here
       </Typography>
-      <form>
+      <form onSubmit={(e) => {
+          e.preventDefault();
+          if(!isQuerying) {
+            setFirebaseQuery(link);
+          }
+      }}>
         <Stack
           display="flex"
           direction={"row"}
@@ -61,7 +94,7 @@ function JoinServer({ open }) {
               "&:hover": { bgcolor: "#3D6974" },
             }}
           >
-            Join
+            {isQuerying ? <CircularProgress /> : "Join"}
           </Button>
         </Stack>
       </form>
