@@ -127,7 +127,7 @@ const Navbar = ({ val, openParent, tabParent, room }) => {
 
   const navList = [
     { val: 1, name: "Home" },
-    { val: 2, name: "Crete Server" },
+    { val: 2, name: "Create Server" },
     { val: 3, name: "Join Server" },
   ];
 
