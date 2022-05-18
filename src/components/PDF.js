@@ -5,6 +5,8 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import { useOutletContext } from "react-router-dom";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import { Document, Page } from "react-pdf/dist/esm/entry.webpack";
+import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
 
 function PDF({ open }) {
   const { socket } = useOutletContext();
@@ -42,7 +44,7 @@ function PDF({ open }) {
   }, [socket]);
 
   return (
-    <>
+    <div>
       <Typography color={"white"} variant="h5" paddingBottom={"10px"}>
         Add PDF
       </Typography>
@@ -114,82 +116,82 @@ function PDF({ open }) {
           sx={{ color: "white", fontSize: "50px", paddingLeft: "10px" }}
         />
       </Stack>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          marginRight: "10vw",
-          paddingTop: "50px"
-        }}
+      <Stack
+        direction={"row"}
+        alignItems="center"
+        justifyContent={"center"}
+        marginRight="200px"
+        marginTop={"50px"}
       >
-        <Document
-          onLoadSuccess={onDocumentLoadSuccess}
-          file="https://firebasestorage.googleapis.com/v0/b/group-study-app-27681.appspot.com/o/IS.pdf?alt=media"
-        >
-          <Page pageNumber={pageNumber} />
-        </Document>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
+        <IconButton
+          style={{ marginRight: "15px" }}
+          type="button"
+          disabled={pageNumber <= 1}
+          onClick={previousPage}
+          sx={{
+            height: "40px",
+            borderRadius: "5px",
+            fontSize: "15px",
+            backgroundColor: "#10B9AE",
+            "&:hover": { bgcolor: "#3D6974" },
+            color: "white",
+            ":disabled": {
+              backgroundColor: "#10B9AE",
+            },
           }}
         >
-          <p>
+          <ArrowLeftIcon />
+        </IconButton>
+        <Box display={"flex"} alignItems={"center"} flexDirection={"column"}>
+          <Button
+            onClick={() => setSynced((boolVal) => !boolVal)}
+            style={{ marginLeft: "15px" }}
+            type="button"
+            sx={{
+              height: "40px",
+              borderRadius: "5px",
+              fontSize: "15px",
+              backgroundColor: "#10B9AE",
+              "&:hover": { bgcolor: "#3D6974" },
+              color: "white",
+              width: "150px",
+              marginBottom: "20px",
+            }}
+          >
+            Sync : {synced ? "On" : "Off"}
+          </Button>
+          <Document
+            onLoadSuccess={onDocumentLoadSuccess}
+            file="https://firebasestorage.googleapis.com/v0/b/group-study-app-27681.appspot.com/o/IS.pdf?alt=media"
+          >
+            <Page pageNumber={pageNumber} />
+          </Document>
+          <Typography variant="h6" sx={{ color: "White", paddingTop: "20px" }}>
             Page {pageNumber || (numPages ? 1 : "--")} of {numPages || "--"}
-          </p>
-          <div style={{ display: "flex" }}>
-            <Button
-              style={{ marginRight: "15px" }}
-              type="button"
-              disabled={pageNumber <= 1}
-              onClick={previousPage}
-              sx={{
-                height: "40px",
-                borderRadius: "5px",
-                fontSize: "15px",
-                backgroundColor: "#10B9AE",
-                "&:hover": { bgcolor: "#3D6974" },
-                color: "white",
-              }}
-            >
-              Previous
-            </Button>
-            <Button
-              type="button"
-              disabled={pageNumber >= numPages}
-              onClick={nextPage}
-              sx={{
-                height: "40px",
-                borderRadius: "5px",
-                fontSize: "15px",
-                backgroundColor: "#10B9AE",
-                "&:hover": { bgcolor: "#3D6974" },
-                color: "white",
-              }}
-            >
-              Next
-            </Button>
-            <Button
-              onClick={() => setSynced((boolVal) => !boolVal)}
-              style={{ marginLeft: "15px" }}
-              type="button"
-              sx={{
-                height: "40px",
-                borderRadius: "5px",
-                fontSize: "15px",
-                backgroundColor: "#10B9AE",
-                "&:hover": { bgcolor: "#3D6974" },
-                color: "white",
-              }}
-            >
-              Sync : {synced ? "On" : "Off"}
-            </Button>
-          </div>
-        </div>
-      </div>
-    </>
+          </Typography>
+        </Box>
+
+        <IconButton
+          type="button"
+          disabled={pageNumber >= numPages}
+          onClick={nextPage}
+          sx={{
+            height: "40px",
+            borderRadius: "5px",
+            fontSize: "15px",
+            backgroundColor: "#10B9AE",
+            "&:hover": { bgcolor: "#3D6974" },
+            color: "white",
+            ":disabled": {
+              backgroundColor: "#10B9AE",
+            },
+            marginLeft: "15px",
+          }}
+        >
+          <ArrowRightIcon />
+        </IconButton>
+      </Stack>
+    </div>
   );
 }
 

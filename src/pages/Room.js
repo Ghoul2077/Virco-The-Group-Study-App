@@ -1,26 +1,42 @@
-import {
-  Divider,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Divider, Stack, Typography } from "@mui/material";
 import { Box } from "@mui/system";
+import { doc, onSnapshot } from "firebase/firestore";
 import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 import socketIOClient from "socket.io-client";
 import Servers from "../components/Servers";
+import { firestore } from "../config/firebase";
 import { useLogin } from "../context/LoginProvider";
+import RoomHome from "./RoomHome";
 
-const socket = socketIOClient(`https://group-study-app.herokuapp.com`);
+// const socket = socketIOClient(`https://group-study-app.herokuapp.com/`);
+const socket = socketIOClient(`http://localhost:4000`);
+// window.scrollTo(0, document.getElementById("scrollingContainer").scrollHeight);
 
-const Room = ({ open }) => {
+const Room = ({ open, serverInfo }) => {
   const { user } = useLogin();
   const { room } = useParams();
   const location = useLocation();
-  
+
   const [path, setPath] = useState();
   const [users, setUsers] = useState([]);
   const [host, setHost] = useState("");
+
+  const [memberData, setMemberData] = useState([]);
+
+  async function userData(userId) {
+    const docRef = doc(firestore, "users", userId);
+    const docSnap = onSnapshot(docRef, (doc) => {
+      memberData.push({ data: doc.data(), id: doc.id });
+    });
+  }
+
+  useEffect(() => {
+    serverInfo.members.map((item) => {
+      userData(item);
+    });
+  }, [serverInfo]);
 
   useEffect(() => {
     setPath(location.pathname.split("/")[2]);
@@ -28,7 +44,7 @@ const Room = ({ open }) => {
 
   useEffect(() => {
     setHost("");
-    
+
     socket.emit("joinRoom", { roomId: room, username: user.displayName });
 
     socket.on("newJoinee", (username) =>
@@ -104,9 +120,17 @@ const Room = ({ open }) => {
           minHeight: "100vh",
         }}
       >
-          <div style={{ display: "inherit" }} >
-            <Outlet context={{ socket }} />
-          </div>
+        <div style={{ display: "inherit" }}>
+          <Outlet context={{ socket }} />
+        </div>
+        {(location.pathname.split("/")[3] === "" ||
+          location.pathname.split("/")[3] === undefined) && (
+          <RoomHome
+            serverInfo={serverInfo}
+            open={open}
+            memberData={memberData}
+          />
+        )}
       </Box>
       <Servers room={true} />
     </div>

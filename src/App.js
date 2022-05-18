@@ -44,7 +44,9 @@ function App() {
         openParent={handleOpen}
         tabParent={handleTab}
         room={
-          location.pathname !== "/" ? location.pathname.split("/")[1] : false
+          location.pathname.split("/").length >= 3
+            ? location.pathname.split("/")
+            : false
         }
       />
       <Routes>
@@ -52,14 +54,17 @@ function App() {
           path="/"
           element={<Dashboard showList={showList} open={open} tab={tab} />}
         />
-        <Route path="/:room" element={<UserAndRoomValidator open={open} />}>
+        <Route
+          path="/:room/:roomId"
+          element={<UserAndRoomValidator open={open} />}
+        >
           <Route path="text" element={<Messages open={open} />} />
           <Route path="video" element={<VideoPlayer open={open} />} />
           <Route path="pdf" element={<PDF open={open} />} />
-          <Route
+          {/* <Route
             path=""
             element={<Navigate to="text" />}
-          />
+          /> */}
         </Route>
       </Routes>
     </div>

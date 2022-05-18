@@ -29,6 +29,7 @@ import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import MessageIcon from "@mui/icons-material/Message";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
+import StorageIcon from "@mui/icons-material/Storage";
 
 const drawerWidth = 340;
 
@@ -103,6 +104,9 @@ const Navbar = ({ val, openParent, tabParent, room }) => {
   let navigate = useNavigate();
   const { user, handleLogout } = useLogin();
 
+  const roomName = room ? room[1].split("%20").join(" ") : null;
+  const roomId = room ? room[2] : null;
+
   const theme = useTheme();
   const [tab, setTab] = useState(1);
   const [open, setOpen] = React.useState(true);
@@ -132,6 +136,7 @@ const Navbar = ({ val, openParent, tabParent, room }) => {
   ];
 
   const channels = [
+    { name: "Server Info", Icon: StorageIcon, url: "" },
     { name: "Text Channel 1", Icon: MessageIcon, url: "text" },
     { name: "Video Channel 1", Icon: VideoLibraryIcon, url: "video" },
     { name: "Pdf Channel 1", Icon: PictureAsPdfIcon, url: "pdf" },
@@ -170,7 +175,7 @@ const Navbar = ({ val, openParent, tabParent, room }) => {
                   <HomeIcon sx={{ color: "white", fontSize: "30px" }} />
                 </IconButton>
                 <Typography paddingTop={"7px"} fontSize="20px">
-                  {room}
+                  {roomName}
                 </Typography>
               </Stack>
             ) : (
@@ -244,8 +249,9 @@ const Navbar = ({ val, openParent, tabParent, room }) => {
           >
             <Box>
               <Avatar
-                alt="Achal Jain"
-                src="/images/images.jpg"
+                // alt={user?.displayName}
+                src="/broken-image.jpg"
+                // src="/images/images.jpg"
                 sx={{
                   bgcolor: "grey",
                   border: "2px solid white",
@@ -389,7 +395,7 @@ const Navbar = ({ val, openParent, tabParent, room }) => {
                   borderRadius: `${open ? "10px" : "0"}`,
                   "&:hover": { bgcolor: `${open ? "#505762" : null}` },
                 }}
-                onClick={() => navigate(`/${room}/${url}`)}
+                onClick={() => navigate(`/${room[1]}/${roomId}/${url}`)}
               >
                 <Icon
                   fontSize="small"

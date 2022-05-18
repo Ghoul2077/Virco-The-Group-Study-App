@@ -1,4 +1,4 @@
-import { TextField, Typography } from "@mui/material";
+import { Button, TextField, Typography } from "@mui/material";
 import React from "react";
 import { useEffect } from "react";
 import { useRef } from "react";
@@ -10,8 +10,13 @@ const VideoPlayer = ({ open }) => {
   const playerRef = useRef(null);
   const [url, setUrl] = useState(
     "https://www.youtube.com/watch?v=y17RuWkWdn8&ab_channel=WebDevSimplified"
-    );
-    const { socket } = useOutletContext();
+  );
+
+  const { socket } = useOutletContext();
+
+  const [link, setLink] = useState(
+    "https://www.youtube.com/watch?v=y17RuWkWdn8&ab_channel=WebDevSimplified"
+  );
   const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
@@ -30,11 +35,11 @@ const VideoPlayer = ({ open }) => {
     }
   }, [socket, playerRef]);
 
-  useEffect(() => {
-    if (socket && url) {
-      socket.emit("updateVideoURL", url);
-    }
-  }, [socket, url]);
+  // useEffect(() => {
+  //   if (socket && url) {
+  //     socket.emit("updateVideoURL", url);
+  //   }
+  // }, [socket, url]);
 
   return (
     <div
@@ -62,30 +67,50 @@ const VideoPlayer = ({ open }) => {
         <Typography htmlFor="url" color="white">
           URL :
         </Typography>
-        <TextField
-          name="url"
-          type="url"
-          value={url}
-          onChange={(event) => setUrl(event.target.value)}
-          required
-          InputProps={{
-            sx: {
-              color: "white",
-            },
-          }}
-          sx={{
-            backgroundColor: "black",
-            width: `${open ? "50vw" : "62vw"}`,
-            //   transition: "width 0.3s",
-            borderRadius: "5px 0 0 5px",
-            fontSize: "30px",
-            fontWeight: "800",
-            opacity: "50%",
+        <form>
+          <TextField
+            name="url"
+            type="url"
+            value={link}
+            onChange={(event) => setLink(event.target.value)}
+            required
+            InputProps={{
+              sx: {
+                color: "white",
+              },
+            }}
+            sx={{
+              backgroundColor: "black",
+              width: `${open ? "45vw" : "52vw"}`,
+              //   transition: "width 0.3s",
+              borderRadius: "5px 0 0 5px",
+              fontSize: "30px",
+              fontWeight: "800",
+              opacity: "50%",
 
-            // marginBottom: "15vh",
-            //   height: "70px",
-          }}
-        />
+              // marginBottom: "15vh",
+              //   height: "70px",
+            }}
+          />
+          <Button
+            variant="contained"
+            onClick={(e) => {
+              setUrl(link);
+              e.preventDefault();
+            }}
+            type="submit"
+            sx={{
+              width: `${open ? "5vw" : "10vw"}`,
+              height: "55px",
+              borderRadius: "0 5px 5px 0",
+              fontSize: "15px",
+              backgroundColor: "#10B9AE",
+              "&:hover": { bgcolor: "#3D6974" },
+            }}
+          >
+            Search
+          </Button>
+        </form>
       </div>
     </div>
   );

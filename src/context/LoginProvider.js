@@ -1,6 +1,11 @@
 import toast from "react-hot-toast";
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification } from "@firebase/auth";
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+} from "@firebase/auth";
 import { doc, onSnapshot, setDoc } from "@firebase/firestore";
 import { auth, firestore } from "../config/firebase";
 
@@ -25,9 +30,14 @@ export const LoginProvider = ({ children }) => {
     setTimeout(() => auth.signOut(), 50);
   }
 
-  async function handleSignupWithEmailAndPassword({ email, password, name, username }) {
+  async function handleSignupWithEmailAndPassword({
+    email,
+    password,
+    name,
+    username,
+  }) {
     setAuthChanging(true);
-    
+
     try {
       const { user } = await createUserWithEmailAndPassword(
         auth,
@@ -39,8 +49,9 @@ export const LoginProvider = ({ children }) => {
       await setDoc(userDataDoc, {
         displayName: name,
         username: username,
+        email: email,
       });
-    } catch({ message }) {
+    } catch ({ message }) {
       toast.error(message);
     }
 

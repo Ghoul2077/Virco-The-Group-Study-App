@@ -1,35 +1,82 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Button, CircularProgress, Stack, TextField, Typography } from "@mui/material";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  serverTimestamp,
+  setDoc,
+  where,
+} from "firebase/firestore";
 import { firestore } from "../config/firebase";
 import toast from "react-hot-toast";
+import { useLogin } from "../context/LoginProvider";
 
 function JoinServer({ open }) {
   const [link, setLink] = useState("");
   const [firebaseQuery, setFirebaseQuery] = useState(false);
   const [isQuerying, setIsQuerying] = useState(false);
+  const { user } = useLogin();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if(firebaseQuery) {
+    if (firebaseQuery) {
       setIsQuerying(true);
-  
-      (async function() {
-        const communitiesRef = collection(firestore, "communities");
-        const q = query(communitiesRef, where("community_name", "==", firebaseQuery));
-        const querySnapshot = await getDocs(q);
-        if(querySnapshot.docs.length > 0) {
-          navigate(`/${link}`);
+      const commId = link.split("/");
+      (async function () {
+        const communitiesRef = doc(firestore, "communities", commId[4]);
+
+        const querySnapshot = await getDoc(communitiesRef);
+        if (querySnapshot.exists()) {
+          const docRef = doc(firestore, "users", user.uid);
+
+          const checkSubscribed = doc(
+            docRef,
+            querySnapshot.data().public ? "public_server" : "private_server",
+            querySnapshot.id
+          );
+
+          const isJoined = await getDoc(checkSubscribed);
+
+          if (isJoined.exists()) {
+            toast.error("You have already joined");
+          } else {
+            const collRef = collection(
+              docRef,
+              querySnapshot.data().public ? "public_server" : "private_server"
+            );
+
+            setDoc(doc(collRef, querySnapshot.id), {
+              community_name: querySnapshot.data().community_name,
+              createdAt: querySnapshot.data().createdAt,
+              public: querySnapshot.data().public,
+              tags: querySnapshot.data().tags,
+              createdBy: querySnapshot.data().createdBy,
+              host: querySnapshot.data().host,
+              joinedOn: serverTimestamp(),
+            });
+
+            navigate(`/${commId[3]}/${commId[4]}`);
+          }
         } else {
           toast.error("Server does not exist");
         }
-      })()
-  
+      })();
+
       setIsQuerying(false);
       setFirebaseQuery("");
     }
-  }, [firebaseQuery])
+  }, [firebaseQuery]);
 
   return (
     <Box>
@@ -50,12 +97,14 @@ function JoinServer({ open }) {
       <Typography variant="h5" paddingTop={"50px"} color="white">
         Use Link Here
       </Typography>
-      <form onSubmit={(e) => {
+      <form
+        onSubmit={(e) => {
           e.preventDefault();
-          if(!isQuerying) {
+          if (!isQuerying) {
             setFirebaseQuery(link);
           }
-      }}>
+        }}
+      >
         <Stack
           display="flex"
           direction={"row"}

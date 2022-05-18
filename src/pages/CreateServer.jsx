@@ -1,19 +1,70 @@
-import { Box, Stack, TextField, Typography, Button } from "@mui/material";
+import {
+  Box,
+  Stack,
+  TextField,
+  Typography,
+  Button,
+  ToggleButtonGroup,
+  ToggleButton,
+} from "@mui/material";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLogin } from "../context/LoginProvider";
 import Autocomplete from "@mui/material/Autocomplete";
 import Chip from "@mui/material/Chip";
+import {
+  addDoc,
+  collection,
+  doc,
+  serverTimestamp,
+  setDoc,
+} from "firebase/firestore";
+import { db, firestore } from "../config/firebase";
+import toast from "react-hot-toast";
+import { async } from "@firebase/util";
 
 function CreateServer({ open }) {
   const navigate = useNavigate();
   const { user, handleLogout } = useLogin();
   const [tagList, setTagList] = useState([]);
-  const [roomName, setRoomName] = useState(1);
-  const handleRoomCreation = () => {
+  const [roomName, setRoomName] = useState("");
+  const [publicServer, setPublicServer] = useState(false);
+  const data = {
+    community_name: roomName,
+    createdAt: serverTimestamp(),
+    public: publicServer,
+    tags: tagList,
+    createdBy: user.uid,
+    host: user.uid,
+    members: [user?.uid],
+  };
+
+  const handleRoomCreation = async (e) => {
     console.log(tagList);
     console.log(roomName);
-    navigate(`/${roomName}`);
+    e.preventDefault();
+
+    try {
+      const docRef = doc(firestore, "users", user.uid);
+      const collRef = collection(
+        docRef,
+        `${publicServer ? "public_server" : "private_server"}`
+      );
+
+      const serverCreated = await addDoc(collRef, data);
+      await setDoc(doc(firestore, "communities", serverCreated.id), data);
+
+      navigate(`/${roomName}/${serverCreated.id}`);
+    } catch ({ message }) {
+      toast.error(message);
+      console.log(message);
+    }
+  };
+
+  const handleType = (event, newType) => {
+    if (newType !== null) {
+      setPublicServer(newType);
+    }
   };
 
   const topTags = ["Physics", "Maths", "Chemistery", "Biology"];
@@ -46,65 +97,88 @@ function CreateServer({ open }) {
               Room Tags:
             </Typography>
           </Stack>
-          <Stack direction="column" spacing={2}>
-            <TextField
-              //   helperText="Please enter your name"
-              onChange={(event) => {
-                setRoomName(event.target.value);
-              }}
-              id="room name"
-              type={"string"}
-              size="small"
-              required
-              sx={{
-                bgcolor: "white",
-                borderRadius: "10px",
-              }}
-              //   label="Name"
-            />
-            <Autocomplete
-              multiple
-              id="tags-filled"
-              options={topTags.map((option) => option)}
-              value={tagList}
-              onChange={(event, newVal) => {
-                setTagList(newVal);
-              }}
-              // defaultValue={[top100Films[13].title]}
-              freeSolo
-              renderTags={(value, getTagProps) =>
-                value.map((option, index) => (
-                  <Chip
-                    variant="outlined"
-                    label={option}
-                    {...getTagProps({ index })}
+          <form>
+            <Stack direction="column" spacing={2}>
+              <TextField
+                name="Room Name"
+                //   helperText="Please enter your name"
+                onChange={(event) => {
+                  setRoomName(event.target.value);
+                }}
+                id="room name"
+                type={"string"}
+                size="small"
+                required
+                sx={{
+                  bgcolor: "white",
+                  borderRadius: "10px",
+                }}
+                //   label="Name"
+              />
+              <Autocomplete
+                multiple
+                id="tags-filled"
+                options={topTags.map((option) => option)}
+                value={tagList}
+                onChange={(event, newVal) => {
+                  setTagList(newVal);
+                }}
+                // defaultValue={[top100Films[13].title]}
+                freeSolo
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => (
+                    <Chip
+                      variant="outlined"
+                      label={option}
+                      {...getTagProps({ index })}
+                    />
+                  ))
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    name="Tags"
+                    size="small"
+                    sx={{
+                      bgcolor: "white",
+                      borderRadius: "10px",
+                      minWidth: "210px",
+                    }}
                   />
-                ))
-              }
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  size="small"
-                  required
-                  sx={{
-                    bgcolor: "white",
-                    borderRadius: "10px",
-                    minWidth: "210px",
-                  }}
-                />
-              )}
-            />
-            <Button
-              variant="contained"
-              onClick={handleRoomCreation}
-              sx={{
-                backgroundColor: "#10B9AE",
-                "&:hover": { bgcolor: "#3D6974" },
-              }}
-            >
-              Create Room
-            </Button>
-          </Stack>
+                )}
+              />
+              <ToggleButtonGroup
+                value={publicServer}
+                exclusive
+                color="secondary"
+                onChange={handleType}
+                aria-label="serverType"
+              >
+                <ToggleButton value={true} sx={{ color: "white" }}>
+                  Public
+                </ToggleButton>
+                <ToggleButton
+                  value={false}
+                  sx={{ color: "white" }}
+                  aria-label="centered"
+                >
+                  Private
+                </ToggleButton>
+              </ToggleButtonGroup>
+
+              <Button
+                variant="contained"
+                type="submit"
+                onClick={handleRoomCreation}
+                sx={{
+                  backgroundColor: "#10B9AE",
+                  "&:hover": { bgcolor: "#3D6974" },
+                }}
+              >
+                Create Room
+              </Button>
+            </Stack>
+          </form>
         </Stack>
       </Box>
       {/* <div

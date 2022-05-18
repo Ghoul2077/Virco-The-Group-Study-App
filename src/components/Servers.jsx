@@ -1,11 +1,35 @@
 import styled from "@emotion/styled";
 import { Avatar, Box, IconButton, Stack, Typography } from "@mui/material";
-import React from "react";
+import { collection, doc, getDocs, onSnapshot } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-const list = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P"];
+import { firestore } from "../config/firebase";
+import { useLogin } from "../context/LoginProvider";
 
 function Servers({ val, room }) {
+  const { user } = useLogin();
+  const [list, setList] = useState([]);
+
+  useEffect(() => {
+    const docRef = doc(firestore, "users", user.uid);
+    const private_server = collection(docRef, "private_server");
+    const public_server = collection(docRef, "public_server");
+    const one = onSnapshot(private_server, (snap) => {
+      snap.docs.map((doc) => {
+        console.log(doc.id);
+        list.push({ id: doc.id, data: doc.data() });
+      });
+    });
+    const two = onSnapshot(public_server, (snap) => {
+      snap.docs.map((doc) => {
+        console.log(doc.id);
+        list.push({ id: doc.id, data: doc.data() });
+      });
+    });
+  }, [user, list]);
+
+  console.log("list", list);
+
   const ServerList = styled("div")(({ theme }) => ({
     zIndex: `${room ? null : "999999999"}`,
     maxWidth: "800px",
@@ -17,7 +41,6 @@ function Servers({ val, room }) {
     background: "#D2D5D8",
     display: "flex",
     justifyContent: "start",
-    //   alignItems: "center",
     overflowX: "scroll",
     borderRadius: "10px 10px 0px 0px",
     "&::-webkit-scrollbar": {
@@ -33,12 +56,19 @@ function Servers({ val, room }) {
         <Stack
           direction="row"
           display={"flex"}
-          justifyContent="start"
-          width={`${room ? null : "80%"}`}
+          justifyContent="center"
+          width={`${room ? "100%" : "100%"}`}
         >
-          {list.map((name) => (
-            <IconButton key={name} onClick={() => navigate(`/${name}`)}>
+          {list.map((item, i) => (
+            <IconButton
+              key={i}
+              onClick={() =>
+                navigate(`/${item.data.community_name}/${item.id}`)
+              }
+            >
               <Avatar
+                alt={item.data.community_name.toUpperCase()}
+                src="/broken-image.jpg"
                 sx={{
                   bgcolor: "#3D535F",
                   width: "50px",
@@ -50,11 +80,10 @@ function Servers({ val, room }) {
                     border: "2px solid #0C2311",
                   },
                 }}
-              >
-                {name}
-              </Avatar>
+              />
             </IconButton>
           ))}
+          {list === [] && <Typography>NO SERVERS JOINED</Typography>}
         </Stack>
       </ServerList>
     </Box>
