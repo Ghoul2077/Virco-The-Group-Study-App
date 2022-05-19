@@ -23,10 +23,11 @@ function UserAndRoomValidator({ open }) {
   // console.log(roomId);
 
   useEffect(() => {
+    let querySnapshot;
     (async function () {
       const communitiesRef = doc(firestore, "communities", roomId);
       // const q = query(communitiesRef, doc(roomId));
-      const querySnapshot = onSnapshot(communitiesRef, (querySnapshot) => {
+      querySnapshot = onSnapshot(communitiesRef, (querySnapshot) => {
         if (!querySnapshot.exists()) {
           toast.error("Room does not exist");
           navigate(`/`);
@@ -50,6 +51,11 @@ function UserAndRoomValidator({ open }) {
         }
       });
     })();
+    return () => {
+      if (querySnapshot) {
+        querySnapshot();
+      }
+    };
   }, [user, roomId]);
 
   if (!isUserValidated) {

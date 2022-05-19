@@ -18,24 +18,29 @@ const Room = ({ open, serverInfo }) => {
   const { user } = useLogin();
   const { room } = useParams();
   const location = useLocation();
-
   const [path, setPath] = useState();
   const [users, setUsers] = useState([]);
   const [host, setHost] = useState("");
 
   const [memberData, setMemberData] = useState([]);
 
-  async function userData(userId) {
-    const docRef = doc(firestore, "users", userId);
-    const docSnap = onSnapshot(docRef, (doc) => {
-      memberData.push({ data: doc.data(), id: doc.id });
-    });
-  }
-
   useEffect(() => {
-    serverInfo.members.map((item) => {
-      userData(item);
+    setMemberData([]);
+    let docSnap = [];
+    serverInfo.members.map(async (userId) => {
+      const docRef = doc(firestore, "users", userId);
+      docSnap.push(
+        onSnapshot(docRef, (doc) => {
+          setMemberData((memberData) => [
+            ...memberData,
+            { data: doc.data(), id: doc.id },
+          ]);
+        })
+      );
     });
+    return () => {
+      docSnap.map((unsubscribe) => unsubscribe());
+    };
   }, [serverInfo]);
 
   useEffect(() => {

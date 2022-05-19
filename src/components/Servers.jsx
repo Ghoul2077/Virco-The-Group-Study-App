@@ -17,16 +17,25 @@ function Servers({ val, room }) {
     const one = onSnapshot(private_server, (snap) => {
       snap.docs.map((doc) => {
         console.log(doc.id);
-        list.push({ id: doc.id, data: doc.data() });
+        setList((list) => [...list, { id: doc.id, data: doc.data() }]);
       });
     });
     const two = onSnapshot(public_server, (snap) => {
       snap.docs.map((doc) => {
-        console.log(doc.id);
-        list.push({ id: doc.id, data: doc.data() });
+        console.log("public", doc.id);
+        setList((list) => [...list, { id: doc.id, data: doc.data() }]);
       });
     });
-  }, [user, list]);
+
+    return () => {
+      if (one) {
+        one();
+      }
+      if (two) {
+        two();
+      }
+    };
+  }, [user]);
 
   console.log("list", list);
 
@@ -83,7 +92,7 @@ function Servers({ val, room }) {
               />
             </IconButton>
           ))}
-          {list === [] && <Typography>NO SERVERS JOINED</Typography>}
+          {list.length === 0 && <Typography>NO SERVERS JOINED</Typography>}
         </Stack>
       </ServerList>
     </Box>

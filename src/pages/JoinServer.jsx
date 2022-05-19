@@ -43,7 +43,7 @@ function JoinServer({ open }) {
           const checkSubscribed = doc(
             docRef,
             querySnapshot.data().public ? "public_server" : "private_server",
-            querySnapshot.id
+            commId[4]
           );
 
           const isJoined = await getDoc(checkSubscribed);
