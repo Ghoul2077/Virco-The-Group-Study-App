@@ -180,7 +180,7 @@ const Navbar = ({ val, openParent, tabParent, room }) => {
               </Stack>
             ) : (
               <>
-                <Box display="flex">
+                <Box display="flex" minWidth={"100%"}>
                   {navList.map((item, index) => (
                     <Button
                       key={index}

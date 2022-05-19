@@ -93,7 +93,7 @@ const Room = ({ open, serverInfo }) => {
         }}
       >
         <Stack paddingTop="10vh" paddingRight="0%">
-          <Typography color="white">Current Host : {host}</Typography>
+          <Typography color="white">Current Sync Host : {host}</Typography>
           <Typography variant="h5" color={"white"} paddingTop="20px">
             Users Connected
           </Typography>
