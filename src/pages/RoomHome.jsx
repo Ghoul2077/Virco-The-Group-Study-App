@@ -13,6 +13,7 @@ import {
   arrayRemove,
   arrayUnion,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -23,7 +24,7 @@ import {
 } from "firebase/firestore";
 import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { firestore } from "../config/firebase";
 import { useLogin } from "../context/LoginProvider";
 
@@ -35,6 +36,7 @@ function RoomHome({ serverInfo, open, memberData }) {
   const [mail, setMail] = useState("");
   const [displayInvite, setDisplayInvite] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     (async function () {
@@ -109,6 +111,55 @@ function RoomHome({ serverInfo, open, memberData }) {
     });
   };
 
+  const handleLeave = (e) => {
+    e.preventDefault();
+    (async function () {
+      const communityRef = doc(firestore, "communities", roomId);
+      if (serverInfo.host === user.uid) {
+        await updateDoc(communityRef, {
+          host: serverInfo?.members[1],
+        });
+      }
+
+      const docRef = doc(firestore, "users", user.uid);
+      const collRef = collection(
+        docRef,
+        serverInfo.public ? "public_server" : "private_server"
+      );
+      const serverDoc = doc(collRef, roomId);
+      await deleteDoc(serverDoc);
+      await updateDoc(communityRef, {
+        members: arrayRemove(user.uid),
+      });
+      navigate("/");
+    })();
+  };
+
+  const handleDelete = (e) => {
+    e.preventDefault();
+    (async function () {
+      const communityRef = doc(firestore, "communities", roomId);
+      await deleteDoc(communityRef);
+      navigate("/");
+    })();
+  };
+  const handleMakeHost = (newHostId) => {
+    (async function () {
+      const communityRef = doc(firestore, "communities", roomId);
+      await updateDoc(communityRef, {
+        host: newHostId,
+      });
+      navigate("/");
+    })();
+  };
+
+  const handleKick = async (userId) => {
+    const docRef = doc(firestore, "communities", roomId);
+    await updateDoc(docRef, {
+      members: arrayRemove(userId),
+    });
+  };
+
   const infoList = [
     {
       header: "CREATED ON",
@@ -128,20 +179,6 @@ function RoomHome({ serverInfo, open, memberData }) {
       info: hostName,
     },
   ];
-
-  const handleKick = async (userId) => {
-    const docRef = doc(firestore, "communities", roomId);
-    await updateDoc(docRef, {
-      members: arrayRemove(userId),
-    });
-  };
-
-  const handleSwitch = async () => {
-    const docRef = doc(firestore, "communities", roomId);
-    await updateDoc(docRef, {
-      public: !serverInfo.public,
-    });
-  };
 
   return (
     <div>
@@ -169,6 +206,7 @@ function RoomHome({ serverInfo, open, memberData }) {
         <div>
           <Button
             variant={"contained"}
+            onClick={handleLeave}
             color={"error"}
             size={"small"}
             sx={{ width: "150px", marginRight: "10px" }}
@@ -178,6 +216,7 @@ function RoomHome({ serverInfo, open, memberData }) {
           {user.uid === serverInfo.host && (
             <Button
               variant={"contained"}
+              onClick={handleDelete}
               color={"error"}
               size={"small"}
               sx={{ width: "150px" }}
@@ -329,7 +368,12 @@ function RoomHome({ serverInfo, open, memberData }) {
             <Stack spacing={2} direction="row">
               {user.uid === serverInfo.host && item.id !== serverInfo.host && (
                 <>
-                  <Button color="success" variant="contained" size="small">
+                  <Button
+                    onClick={() => handleMakeHost(item.id)}
+                    color="success"
+                    variant="contained"
+                    size="small"
+                  >
                     Make Host
                   </Button>
                   <Button

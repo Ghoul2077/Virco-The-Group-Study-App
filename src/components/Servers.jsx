@@ -1,5 +1,13 @@
 import styled from "@emotion/styled";
-import { Avatar, Box, IconButton, Stack, Typography } from "@mui/material";
+import {
+  Avatar,
+  Box,
+  IconButton,
+  Popover,
+  Stack,
+  Typography,
+} from "@mui/material";
+import e from "cors";
 import { collection, doc, getDocs, onSnapshot } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
@@ -75,6 +83,7 @@ function Servers({ initialState, room }) {
     },
   }));
   const navigate = useNavigate();
+
   return (
     <Box sx={{ display: "flex", justifyContent: "center" }}>
       <ServerList>
@@ -87,7 +96,7 @@ function Servers({ initialState, room }) {
           direction="row"
           display={"flex"}
           justifyContent="center"
-          width={`${room ? "100%" : "100%"}`}
+          width={"100%"}
         >
           {list.map((item, i) => (
             <Tooltip title={`${item.data.community_name}, Type : ${item.data.public ? "Public" : "Private"}`} arrow>
