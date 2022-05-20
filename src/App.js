@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
+import Loader from "./components/Loader";
 import Messages from "./components/Messages";
 import Navbar from "./components/Navbar";
 import PDF from "./components/PDF";
@@ -30,7 +31,7 @@ function App() {
   };
 
   if (isLoading) {
-    return <p>Loading</p>;
+    return <Loader loaderText="Loading" />;
   }
 
   if (!user) {

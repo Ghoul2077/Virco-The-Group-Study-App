@@ -10,6 +10,7 @@ import {
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
+import Loader from "./Loader";
 import { firestore } from "../config/firebase";
 import { useLogin } from "../context/LoginProvider";
 import Room from "../pages/Room";
@@ -59,7 +60,7 @@ function UserAndRoomValidator({ open }) {
   }, [user, roomId]);
 
   if (!isUserValidated) {
-    return <div>Connecting to the server...</div>;
+    return <Loader loaderText="Connecting to the server" />
   }
 
   return <Room open={open} serverInfo={serverInfo} />;
