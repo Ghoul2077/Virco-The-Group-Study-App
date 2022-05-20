@@ -132,7 +132,7 @@ const Room = ({ open, serverInfo }) => {
           />
         )}
       </Box>
-      <Servers room={true} />
+      <Servers initialState={false} room={true} />
     </div>
   );
 };

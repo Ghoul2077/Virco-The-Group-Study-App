@@ -2,15 +2,23 @@ import styled from "@emotion/styled";
 import { Avatar, Box, IconButton, Stack, Typography } from "@mui/material";
 import { collection, doc, getDocs, onSnapshot } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { useNavigate } from "react-router-dom";
 import { firestore } from "../config/firebase";
 import { useLogin } from "../context/LoginProvider";
 
-function Servers({ val, room }) {
+function Servers({ initialState, room }) {
   const { user } = useLogin();
   const [list, setList] = useState([]);
+  const [isVisible, setIsVisible] = useState(initialState);
+
+  function handleToggle() {
+    setIsVisible((visible) => !visible);
+  }
 
   useEffect(() => {
+    setList([]);
     const docRef = doc(firestore, "users", user.uid);
     const private_server = collection(docRef, "private_server");
     const public_server = collection(docRef, "public_server");
@@ -37,12 +45,20 @@ function Servers({ val, room }) {
     padding: "0px 10px 0px 10px",
     bottom: "0",
     width: `${room ? "100%" : "80%"}`,
-    height: `${val ? "0px" : "70px"}`,
+    height: `${!isVisible ? "10px" : "70px"}`,
     background: "#D2D5D8",
     display: "flex",
     justifyContent: "start",
-    overflowX: "scroll",
     borderRadius: "10px 10px 0px 0px",
+    "&::-webkit-scrollbar": {
+      width: "0",
+      height: "0",
+    },
+  }));
+
+  const ScrollableDiv = styled("div")(({ theme }) => ({
+    overflowX: "scroll", 
+    width: "100%",
     "&::-webkit-scrollbar": {
       width: "0",
       height: "0",
@@ -52,7 +68,11 @@ function Servers({ val, room }) {
   return (
     <Box sx={{ display: "flex", justifyContent: "center" }}>
       <ServerList>
+        <button onClick={handleToggle} style={{ position: "absolute", right: 10, top: -24, background: "#D2D5D8", border: 0, borderTopLeftRadius: 10, borderTopRightRadius: 10 }}>
+          {isVisible ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />}
+        </button>
         {/* <Typography sx={{ fontSize: "60px" }}>servers</Typography> */}
+        <ScrollableDiv style={{ overflowX: "scroll", width: "100%" }}>
         <Stack
           direction="row"
           display={"flex"}
@@ -85,6 +105,7 @@ function Servers({ val, room }) {
           ))}
           {list === [] && <Typography>NO SERVERS JOINED</Typography>}
         </Stack>
+        </ScrollableDiv>
       </ServerList>
     </Box>
   );
