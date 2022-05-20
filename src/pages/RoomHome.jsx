@@ -5,6 +5,7 @@ import {
   Divider,
   Paper,
   Stack,
+  Switch,
   TextField,
   Typography,
 } from "@mui/material";
@@ -22,7 +23,7 @@ import {
 } from "firebase/firestore";
 import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { firestore } from "../config/firebase";
 import { useLogin } from "../context/LoginProvider";
 
@@ -33,6 +34,7 @@ function RoomHome({ serverInfo, open, memberData }) {
   const [creater, setCreater] = useState();
   const [mail, setMail] = useState("");
   const [displayInvite, setDisplayInvite] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     (async function () {
@@ -56,6 +58,10 @@ function RoomHome({ serverInfo, open, memberData }) {
   }, [serverInfo]);
 
   useEffect(() => {
+    setMail("");
+  }, [location]);
+
+  useEffect(() => {
     if (mail === "") {
       setDisplayInvite(false);
     }
@@ -75,7 +81,7 @@ function RoomHome({ serverInfo, open, memberData }) {
         (member) => member === querySnapshot.docs[0].id
       );
       if (isMember) {
-        toast.success("User Already Added");
+        toast.error("User Already Added");
         return false;
       } else {
         toast.success("Invited");
@@ -116,6 +122,7 @@ function RoomHome({ serverInfo, open, memberData }) {
       header: "SERVER TYPE",
       info: serverInfo.public ? "Public" : "Private",
     },
+
     {
       header: "HOST",
       info: hostName,
@@ -126,6 +133,13 @@ function RoomHome({ serverInfo, open, memberData }) {
     const docRef = doc(firestore, "communities", roomId);
     await updateDoc(docRef, {
       members: arrayRemove(userId),
+    });
+  };
+
+  const handleSwitch = async () => {
+    const docRef = doc(firestore, "communities", roomId);
+    await updateDoc(docRef, {
+      public: !serverInfo.public,
     });
   };
 
@@ -173,7 +187,6 @@ function RoomHome({ serverInfo, open, memberData }) {
           )}
         </div>
       </Box>
-
       <Box
         sx={{
           background: "#1B1A17",
@@ -206,7 +219,7 @@ function RoomHome({ serverInfo, open, memberData }) {
           ))}
         </Box>
       </Box>
-      {user.id === serverInfo.host && (
+      {user.uid === serverInfo.host && (
         <Box
           sx={{
             background: "#1B1A17",
@@ -219,6 +232,7 @@ function RoomHome({ serverInfo, open, memberData }) {
           <form onSubmit={handleInvite}>
             <TextField
               placeholder="Enter User's Email"
+              value={mail}
               onChange={(event) => setMail(event.target.value)}
               name="email"
               id="email"
@@ -303,12 +317,13 @@ function RoomHome({ serverInfo, open, memberData }) {
           padding: "20px",
         }}
       >
-        {memberData.map((item) => (
+        {memberData.map((item, i) => (
           <Box
             padding="10px"
             display="flex"
             justifyContent={"space-between"}
             alignItems="center"
+            key={i}
           >
             <Typography>{item.data.displayName}</Typography>
             <Stack spacing={2} direction="row">
@@ -319,7 +334,7 @@ function RoomHome({ serverInfo, open, memberData }) {
                   </Button>
                   <Button
                     color="error"
-                    onClick={handleKick(item.id)}
+                    onClick={() => handleKick(item.id)}
                     variant="contained"
                     size="small"
                   >
