@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import {
   Avatar,
   Box,
+  Button,
   IconButton,
   Popover,
   Stack,
@@ -10,9 +11,9 @@ import {
 import e from "cors";
 import { collection, doc, getDocs, onSnapshot } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
-import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
+import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { useNavigate } from "react-router-dom";
 import { firestore } from "../config/firebase";
 import { useLogin } from "../context/LoginProvider";
@@ -75,7 +76,7 @@ function Servers({ initialState, room }) {
   }));
 
   const ScrollableDiv = styled("div")(({ theme }) => ({
-    overflowX: "scroll", 
+    overflowX: "scroll",
     width: "100%",
     "&::-webkit-scrollbar": {
       width: "0",
@@ -87,19 +88,36 @@ function Servers({ initialState, room }) {
   return (
     <Box sx={{ display: "flex", justifyContent: "center" }}>
       <ServerList>
-        <button onClick={handleToggle} style={{ position: "absolute", right: 10, top: -24, background: "#D2D5D8", border: 0, borderTopLeftRadius: 10, borderTopRightRadius: 10 }}>
+        <Button
+          onClick={handleToggle}
+          size="small"
+          style={{
+            position: "absolute",
+            right: 10,
+            top: -24,
+            background: "#D2D5D8",
+            border: 0,
+            borderTopLeftRadius: 10,
+            borderTopRightRadius: 10,
+          }}
+        >
           {isVisible ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />}
-        </button>
+        </Button>
         {/* <Typography sx={{ fontSize: "60px" }}>servers</Typography> */}
         <ScrollableDiv style={{ overflowX: "scroll", width: "100%" }}>
-        <Stack
-          direction="row"
-          display={"flex"}
-          justifyContent="center"
-          width={"100%"}
-        >
-          {list.map((item, i) => (
-            <Tooltip title={`${item.data.community_name}, Type : ${item.data.public ? "Public" : "Private"}`} arrow>
+          <Stack
+            direction="row"
+            display={"flex"}
+            justifyContent="center"
+            width={"100%"}
+          >
+            {list.map((item, i) => (
+              <Tooltip
+                title={`${item.data.community_name}, Type : ${
+                  item.data.public ? "Public" : "Private"
+                }`}
+                arrow
+              >
                 <IconButton
                   onClick={() =>
                     navigate(`/${item.data.community_name}/${item.id}`)
@@ -122,9 +140,9 @@ function Servers({ initialState, room }) {
                   />
                 </IconButton>
               </Tooltip>
-          ))}
-          {list.length === 0 && <Typography>NO SERVERS JOINED</Typography>}
-        </Stack>
+            ))}
+            {list.length === 0 && <Typography>NO SERVERS JOINED</Typography>}
+          </Stack>
         </ScrollableDiv>
       </ServerList>
     </Box>

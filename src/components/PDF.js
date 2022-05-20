@@ -1,15 +1,23 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Box } from "@mui/system";
 import { Button, IconButton, Dialog, Stack, Typography, DialogContent } from "@mui/material";
 import DialogActions from '@mui/material/DialogActions';
 import AddCircleIcon from "@mui/icons-material/AddCircle";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useParams } from "react-router-dom";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import { Document, Page } from "react-pdf/dist/esm/entry.webpack";
 import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
 import SyncIcon from '@mui/icons-material/Sync';
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
+import {
+  getDownloadURL,
+  getStorage,
+  listAll,
+  ref,
+  uploadBytes,
+} from "firebase/storage";
+import toast from "react-hot-toast";
 
 const style = {
   position: 'absolute',
@@ -20,6 +28,7 @@ const style = {
 
 function PDF({ open }) {
   const { socket } = useOutletContext();
+  const { room, roomId } = useParams();
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [showModal, setShowModal] = useState(true);
@@ -28,6 +37,10 @@ function PDF({ open }) {
 
   const handleModalOpen = () => setShowModal(true);
   const handleModalClose = () => setShowModal(false);
+
+  const inputFile = useRef(null);
+  const [file, setFile] = useState(null);
+  const [pdfUrls, setPdfUrls] = useState([]);
 
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages);
@@ -57,14 +70,53 @@ function PDF({ open }) {
       setPageNumber(pageNumber);
     });
   }, [socket]);
+  useEffect(() => {
+    if (file != null) {
+      const storage = getStorage();
+      const storageRef = ref(storage, `${roomId}/${file.name}`);
+
+      const snapshot = uploadBytes(storageRef, file);
+      toast.promise(snapshot, {
+        loading: "Uploading....",
+        success: "File Uploaded",
+        error: "Check your internet connection",
+      });
+      setFile(null);
+    }
+  }, [file]);
+
+  useEffect(() => {
+    const storage = getStorage();
+    const listRef = ref(storage, `${roomId}`);
+    listAll(listRef).then((res) =>
+      res.items.forEach((itemRef) => {
+        // All the items under listRef.
+        getDownloadURL(ref(storage, itemRef.fullPath)).then((downloadURL) => {
+          console.log(downloadURL);
+          setPdfUrls((url) => [...url, downloadURL]);
+        });
+      })
+    );
+  }, []);
 
   return (
     <div>
+      <input
+        type="file"
+        accept="application/pdf"
+        id="file"
+        onChange={(e) => setFile(e.target.files[0])}
+        ref={inputFile}
+        style={{ display: "none" }}
+      />
       <Typography color={"white"} variant="h5" paddingBottom={"10px"}>
         Add PDF
       </Typography>
 
-      <IconButton sx={{ "&:hover": { borderRadius: "10px" } }}>
+      <IconButton
+        onClick={() => inputFile.current.click()}
+        sx={{ "&:hover": { borderRadius: "10px" } }}
+      >
         <Box
           sx={{
             width: `${open ? "52vw" : "72vw"}`,
