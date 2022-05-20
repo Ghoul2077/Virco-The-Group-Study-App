@@ -56,17 +56,23 @@ function JoinServer({ open }) {
               querySnapshot.data().public ? "public_server" : "private_server"
             );
 
-            setDoc(doc(collRef, querySnapshot.id), {
-              community_name: querySnapshot.data().community_name,
-              createdAt: querySnapshot.data().createdAt,
-              public: querySnapshot.data().public,
-              tags: querySnapshot.data().tags,
-              createdBy: querySnapshot.data().createdBy,
-              host: querySnapshot.data().host,
-              joinedOn: serverTimestamp(),
-            });
+            if (
+              querySnapshot.data().members.some((member) => member === user.uid)
+            ) {
+              setDoc(doc(collRef, querySnapshot.id), {
+                community_name: querySnapshot.data().community_name,
+                createdAt: querySnapshot.data().createdAt,
+                public: querySnapshot.data().public,
+                tags: querySnapshot.data().tags,
+                createdBy: querySnapshot.data().createdBy,
+                host: querySnapshot.data().host,
+                joinedOn: serverTimestamp(),
+              });
 
-            navigate(`/${commId[3]}/${commId[4]}`);
+              navigate(`/${commId[3]}/${commId[4]}`);
+            } else {
+              toast.error("You are not Invited");
+            }
           }
         } else {
           toast.error("Server does not exist");
