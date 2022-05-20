@@ -77,7 +77,7 @@ function PDF({ open }) {
       res.items.forEach((itemRef) => {
         // All the items under listRef.
         getDownloadURL(ref(storage, itemRef.fullPath)).then((downloadURL) => {
-          console.log(downloadURL);
+          // console.log(downloadURL);
           setPdfUrls((url) => [...url, downloadURL]);
         });
       })

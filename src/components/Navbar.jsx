@@ -30,6 +30,15 @@ import MessageIcon from "@mui/icons-material/Message";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
 import StorageIcon from "@mui/icons-material/Storage";
+import {
+  collection,
+  limit,
+  onSnapshot,
+  orderBy,
+  query,
+  where,
+} from "firebase/firestore";
+import { firestore } from "../config/firebase";
 
 const drawerWidth = 340;
 
@@ -111,6 +120,7 @@ const Navbar = ({ val, openParent, tabParent, room }) => {
   const [tab, setTab] = useState(1);
   const [open, setOpen] = React.useState(true);
   const [showServ, setShowServ] = useState(true);
+  const [publicRooms, setPublicRooms] = useState([]);
 
   useEffect(() => {
     openParent(open);
@@ -128,6 +138,30 @@ const Navbar = ({ val, openParent, tabParent, room }) => {
   const handleDrawerClose = () => {
     setOpen(false);
   };
+
+  useEffect(() => {
+    setPublicRooms([]);
+    const communityRef = collection(firestore, "communities");
+    const q = query(
+      communityRef,
+      where("public", "==", true),
+      orderBy("createdAt", "desc"),
+      limit(10)
+    );
+    const querySnapshot = onSnapshot(q, (snapshot) => {
+      if (snapshot.docs.length !== 0) {
+        snapshot.docs.map((doc) => {
+          setPublicRooms((room) => [...room, { id: doc.id, data: doc.data() }]);
+        });
+      }
+    });
+
+    return () => {
+      if (querySnapshot) {
+        querySnapshot();
+      }
+    };
+  }, []);
 
   const navList = [
     { val: 1, name: "Home" },
@@ -224,7 +258,7 @@ const Navbar = ({ val, openParent, tabParent, room }) => {
         {/* <Divider /> */}
         <Stack
           direction="column"
-          height={room ? null : "60vh"}
+          height={room ? null : "35vh"}
           spacing={2}
           sx={{ padding: "20px", overflow: "hidden" }}
         >
@@ -347,19 +381,32 @@ const Navbar = ({ val, openParent, tabParent, room }) => {
               },
             }}
           >
-            <Button variant="outlined">Room 1</Button>
-            <Button variant="outlined">Room 1</Button>
-            <Button variant="outlined">Room 1</Button>
-            <Button variant="outlined">Room 1</Button>
-            <Button variant="outlined">Room 1</Button>
-            <Button variant="outlined">Room 1</Button>
-            <Button variant="outlined">Room 1</Button>
-            <Button variant="outlined">Room 1</Button>
-            <Button variant="outlined">Room 1</Button>
-            <Button variant="outlined">Room 1</Button>
-            <Button variant="outlined">Room 1</Button>
-            <Button variant="outlined">Room 1</Button>
-            <Button variant="outlined">Room 1</Button>
+            {publicRooms.map((item, i) => (
+              <Button
+                key={i}
+                variant="contained"
+                // color="secondary"
+                sx={{
+                  borderColor: "#3D6974",
+                  color: "white",
+                  bgcolor: "#3D6974",
+                  "&:hover": {
+                    bgcolor: "white",
+                    color: "#3D6974",
+                  },
+                }}
+                onClick={() =>
+                  navigate(`/${item.data.community_name}/${item.id}`)
+                }
+              >
+                {item.data.community_name}
+              </Button>
+            ))}
+            {publicRooms.length === 0 && (
+              <Typography sx={{ color: "white", fontSize: "20px" }}>
+                NO RECENT ROOMS
+              </Typography>
+            )}
           </Stack>
         )}
         {room && (
