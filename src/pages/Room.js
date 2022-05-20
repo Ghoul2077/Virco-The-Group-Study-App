@@ -71,7 +71,7 @@ const Room = ({ open, serverInfo }) => {
 
   useEffect(() => {
     if (host) {
-      toast.success(`${host} is the host`);
+      toast.success(`${host} is the sync master`);
     }
   }, [host]);
 
