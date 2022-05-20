@@ -43,7 +43,7 @@ function Dashboard({ showList, open, tab }) {
         {tab === 2 && <CreateServer open={open} />}
         {tab === 3 && <JoinServer open={open} />}
       </Box>
-      <Servers val={showList} room={false} />
+      <Servers initialState={true} room={false} />
     </div>
   );
 }

@@ -194,17 +194,6 @@ const Navbar = ({ val, openParent, tabParent, room }) => {
                     </Button>
                   ))}
                 </Box>
-
-                <Button
-                  variant={showServ ? "contained" : "text"}
-                  onClick={() => handleServer()}
-                  style={{
-                    color: "white",
-                    marginLeft: `${open ? "40vw" : "60vw"}`,
-                  }}
-                >
-                  Your Servers
-                </Button>
               </>
             )}
           </Stack>

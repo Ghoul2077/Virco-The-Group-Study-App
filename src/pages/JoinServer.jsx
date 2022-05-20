@@ -31,6 +31,12 @@ function JoinServer({ open }) {
 
   useEffect(() => {
     if (firebaseQuery) {
+      if (/^https:\/\/virco.gg\/.+\/.+$/.test(firebaseQuery) === false) {
+        toast.error("Enter a valid invite link");
+        setFirebaseQuery("");
+        return;
+      }
+
       setIsQuerying(true);
       const commId = link.split("/");
       (async function () {
