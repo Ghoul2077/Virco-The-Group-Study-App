@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { Avatar, Box, IconButton, Stack, Typography } from "@mui/material";
 import { collection, doc, getDocs, onSnapshot } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
+import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { useNavigate } from "react-router-dom";
@@ -89,28 +90,29 @@ function Servers({ initialState, room }) {
           width={`${room ? "100%" : "100%"}`}
         >
           {list.map((item, i) => (
-            <IconButton
-              key={i}
-              onClick={() =>
-                navigate(`/${item.data.community_name}/${item.id}`)
-              }
-            >
-              <Avatar
-                alt={item.data.community_name.toUpperCase()}
-                src="/broken-image.jpg"
-                sx={{
-                  bgcolor: "#3D535F",
-                  width: "50px",
-                  height: "50px",
-                  fontSize: "30px",
-                  border: "2px solid red",
-                  "&:hover": {
-                    background: "#2A7299",
-                    border: "2px solid #0C2311",
-                  },
-                }}
-              />
-            </IconButton>
+            <Tooltip title={`${item.data.community_name}, Type : ${item.data.public ? "Public" : "Private"}`} arrow>
+                <IconButton
+                  onClick={() =>
+                    navigate(`/${item.data.community_name}/${item.id}`)
+                  }
+                >
+                  <Avatar
+                    alt={item.data.community_name.toUpperCase()}
+                    src="/broken-image.jpg"
+                    sx={{
+                      bgcolor: "#3D535F",
+                      width: "50px",
+                      height: "50px",
+                      fontSize: "30px",
+                      border: "2px solid red",
+                      "&:hover": {
+                        background: "#2A7299",
+                        border: "2px solid #0C2311",
+                      },
+                    }}
+                  />
+                </IconButton>
+              </Tooltip>
           ))}
           {list.length === 0 && <Typography>NO SERVERS JOINED</Typography>}
         </Stack>
