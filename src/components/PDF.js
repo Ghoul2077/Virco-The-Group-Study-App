@@ -195,8 +195,10 @@ function PDF({ open }) {
               backgroundColor: "transparent",
               boxShadow: "none"
             }, "& .MuiBackdrop-root": {
-              backgroundColor: "rgba(0, 0, 0, 0.7)"
-            }}}
+              backgroundColor: "rgba(0, 0, 0, 0.7)",
+            }, "& .MuiDialogContent-root" : {
+                overflow: "hidden"
+              }}}
             open={showModal}
             onClose={handleModalClose}
             scroll="body"
@@ -206,7 +208,7 @@ function PDF({ open }) {
                   onLoadSuccess={onDocumentLoadSuccess}
                   file={url}
                   >
-                <Page loading={() => <div style={{ color: "white" }}>Loading PDF...</div>} canvasBackground="transparent" pageNumber={pageNumber} />
+                <Page loading={() => <div style={{ color: "white" }}>Loading PDF...</div>} pageNumber={pageNumber} />
                 </Document>
             </DialogContent>
             <DialogActions sx={{ display: "flex", justifyContent: "center" }}>
