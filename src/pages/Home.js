@@ -168,7 +168,9 @@ const Home = ({ open }) => {
 
             <Button
               size="small"
-              onClick={() => navigate(`/${item.data.community_name}`)}
+              onClick={() =>
+                navigate(`/${item.data.community_name}/${item.id}`)
+              }
               sx={{
                 width: `${open ? "10vw" : "10vw"}`,
                 fontSize: `${open ? "15px" : "15px"}`,
