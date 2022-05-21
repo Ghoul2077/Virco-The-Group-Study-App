@@ -11,7 +11,7 @@ import {
 import e from "cors";
 import { collection, doc, getDocs, onSnapshot } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
+import Tooltip from "@mui/material/Tooltip";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { useNavigate } from "react-router-dom";
@@ -113,6 +113,7 @@ function Servers({ initialState, room }) {
           >
             {list.map((item, i) => (
               <Tooltip
+                key={i}
                 title={`${item.data.community_name}, Type : ${
                   item.data.public ? "Public" : "Private"
                 }`}
