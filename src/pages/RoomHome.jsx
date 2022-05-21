@@ -258,16 +258,17 @@ function RoomHome({ serverInfo, open, memberData }) {
           ))}
         </Box>
       </Box>
-      {user.uid === serverInfo.host && (
-        <Box
-          sx={{
-            background: "#1B1A17",
-            width: `${open ? "55vw" : "70vw"}`,
-            padding: "50px ",
-            borderRadius: "0 0 10px 10px",
-            marginTop: "10px",
-          }}
-        >
+
+      <Box
+        sx={{
+          background: "#1B1A17",
+          width: `${open ? "55vw" : "70vw"}`,
+          padding: "50px ",
+          borderRadius: "0 0 10px 10px",
+          marginTop: "10px",
+        }}
+      >
+        {!serverInfo.public && user.uid === serverInfo.host && (
           <form onSubmit={handleInvite}>
             <TextField
               placeholder="Enter User's Email"
@@ -314,82 +315,86 @@ function RoomHome({ serverInfo, open, memberData }) {
               Invite
             </Button>
           </form>
-          <Typography sx={{ color: "white", paddingTop: "10px" }}>
-            Invite Link :
+        )}
+        <Typography sx={{ color: "white", paddingTop: "10px" }}>
+          Invite Link :
+        </Typography>
+        <Button
+          onClick={() => {
+            navigator.clipboard.writeText(
+              `https://virco.gg/${serverInfo.community_name}/${roomId}`
+            );
+            toast.success("Link Copied");
+          }}
+          size="small"
+          sx={{
+            backgroundColor: "#3A3845",
+            width: `${open ? "47vw" : "62vw"}`,
+            opacity: "50%",
+            marginTop: "10px",
+            color: "White",
+            fontSize: "20px",
+            fontWeight: "500",
+          }}
+        >
+          https://virco.gg/{serverInfo.community_name}/{roomId}
+        </Button>
+      </Box>
+      {!serverInfo.public && (
+        <>
+          <Typography
+            variant={"h4"}
+            sx={{ color: "white", padding: "20px 0 20px 0" }}
+          >
+            MEMBERS
           </Typography>
-          <Button
-            onClick={() => {
-              navigator.clipboard.writeText(
-                `https://virco.gg/${serverInfo.community_name}/${roomId}`
-              );
-              toast.success("Link Copied");
-            }}
-            size="small"
+          <Box
             sx={{
-              backgroundColor: "#3A3845",
-              width: `${open ? "47vw" : "62vw"}`,
-              opacity: "50%",
+              backgroundColor: "#1B1A17",
+              width: `${open ? "55vw" : "70vw"}`,
               marginTop: "10px",
-              color: "White",
+              color: "white",
               fontSize: "20px",
               fontWeight: "500",
+              padding: "20px",
             }}
           >
-            https://virco.gg/{serverInfo.community_name}/{roomId}
-          </Button>
-        </Box>
-      )}
-      <Typography
-        variant={"h4"}
-        sx={{ color: "white", padding: "20px 0 20px 0" }}
-      >
-        MEMBERS
-      </Typography>
-      <Box
-        sx={{
-          backgroundColor: "#1B1A17",
-          width: `${open ? "55vw" : "70vw"}`,
-          marginTop: "10px",
-          color: "white",
-          fontSize: "20px",
-          fontWeight: "500",
-          padding: "20px",
-        }}
-      >
-        {memberData.map((item, i) => (
-          <Box
-            padding="10px"
-            display="flex"
-            justifyContent={"space-between"}
-            alignItems="center"
-            key={i}
-          >
-            <Typography>{item.data.displayName}</Typography>
-            <Stack spacing={2} direction="row">
-              {user.uid === serverInfo.host && item.id !== serverInfo.host && (
-                <>
-                  <Button
-                    onClick={() => handleMakeHost(item.id)}
-                    color="success"
-                    variant="contained"
-                    size="small"
-                  >
-                    Make Host
-                  </Button>
-                  <Button
-                    color="error"
-                    onClick={() => handleKick(item.id)}
-                    variant="contained"
-                    size="small"
-                  >
-                    KICK
-                  </Button>
-                </>
-              )}
-            </Stack>
+            {memberData.map((item, i) => (
+              <Box
+                padding="10px"
+                display="flex"
+                justifyContent={"space-between"}
+                alignItems="center"
+                key={i}
+              >
+                <Typography>{item.data.displayName}</Typography>
+                <Stack spacing={2} direction="row">
+                  {user.uid === serverInfo.host && item.id !== serverInfo.host && (
+                    <>
+                      <Button
+                        onClick={() => handleMakeHost(item.id)}
+                        color="success"
+                        variant="contained"
+                        size="small"
+                      >
+                        Make Host
+                      </Button>
+                      <Button
+                        color="error"
+                        onClick={() => handleKick(item.id)}
+                        variant="contained"
+                        size="small"
+                      >
+                        KICK
+                      </Button>
+                    </>
+                  )}
+                </Stack>
+              </Box>
+            ))}
           </Box>
-        ))}
-      </Box>
+        </>
+      )}
     </div>
   );
 }

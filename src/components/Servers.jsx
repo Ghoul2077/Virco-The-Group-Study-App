@@ -28,11 +28,11 @@ function Servers({ initialState, room }) {
   }
 
   useEffect(() => {
-    setList([]);
     const docRef = doc(firestore, "users", user.uid);
     const private_server = collection(docRef, "private_server");
     const public_server = collection(docRef, "public_server");
     const one = onSnapshot(private_server, (snap) => {
+      setList([]);
       snap.docs.map((doc) => {
         console.log(doc.id);
         setList((list) => [...list, { id: doc.id, data: doc.data() }]);
@@ -93,7 +93,7 @@ function Servers({ initialState, room }) {
           size="small"
           style={{
             position: "absolute",
-            right: 10,
+            right: 1,
             top: -24,
             background: "#D2D5D8",
             border: 0,
