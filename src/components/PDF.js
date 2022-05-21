@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { Box } from "@mui/system";
-import { Button, IconButton, Dialog, Stack, Typography, DialogContent } from "@mui/material";
+import { Button, IconButton, Dialog, Stack, Typography, DialogContent, CircularProgress } from "@mui/material";
 import DialogActions from '@mui/material/DialogActions';
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import { useOutletContext, useParams } from "react-router-dom";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import { Document, Page } from "react-pdf/dist/esm/entry.webpack";
-import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
+import Tooltip from '@mui/material/Tooltip';
 import SyncIcon from '@mui/icons-material/Sync';
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
+import ReplayIcon from '@mui/icons-material/Replay';
 import {
   getDownloadURL,
   getStorage,
@@ -31,12 +32,13 @@ function PDF({ open }) {
   const { room, roomId } = useParams();
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
-  const [showModal, setShowModal] = useState(true);
+  const [showModal, setShowModal] = useState(false);
   const [synced, setSynced] = useState(false);
+  const [refetchFiles, setRefetchFiles] = useState(true);
   const [url, setUrl] = useState("");
+  const [fetchingPDFS, setFetchingPDFS] = useState(false);
 
-  const handleModalOpen = () => setShowModal(true);
-  const handleModalClose = () => setShowModal(false);
+  const handleModalClose = () => { setShowModal(false); setUrl("") };
 
   const inputFile = useRef(null);
   const [file, setFile] = useState(null);
@@ -60,6 +62,13 @@ function PDF({ open }) {
   }
 
   useEffect(() => {
+    if(url) {
+      setShowModal(true);
+    }
+  }, [url])
+  
+
+  useEffect(() => {
     if (synced) {
       socket.emit("syncPages", pageNumber);
     }
@@ -70,6 +79,7 @@ function PDF({ open }) {
       setPageNumber(pageNumber);
     });
   }, [socket]);
+
   useEffect(() => {
     if (file != null) {
       const storage = getStorage();
@@ -86,18 +96,24 @@ function PDF({ open }) {
   }, [file]);
 
   useEffect(() => {
-    const storage = getStorage();
-    const listRef = ref(storage, `${roomId}`);
-    listAll(listRef).then((res) =>
-      res.items.forEach((itemRef) => {
-        // All the items under listRef.
-        getDownloadURL(ref(storage, itemRef.fullPath)).then((downloadURL) => {
-          console.log(downloadURL);
-          setPdfUrls((url) => [...url, downloadURL]);
-        });
-      })
-    );
-  }, []);
+    if(refetchFiles) {
+      setFetchingPDFS(true);
+      setPdfUrls([]);
+      const storage = getStorage();
+      const listRef = ref(storage, `${roomId}`);
+      listAll(listRef).then((res) =>{
+        res.items.forEach((itemRef) => {
+          // All the items under listRef.
+          getDownloadURL(ref(storage, itemRef.fullPath)).then((downloadURL) => {
+            console.log(downloadURL);
+            setPdfUrls((url) => [...url, { name: itemRef.name, downloadURL }]);
+          });
+        })
+        setFetchingPDFS(false);
+      });
+      setRefetchFiles(false);
+    }
+  }, [refetchFiles]);
 
   return (
     <div>
@@ -115,7 +131,7 @@ function PDF({ open }) {
 
       <IconButton
         onClick={() => inputFile.current.click()}
-        sx={{ "&:hover": { borderRadius: "10px" } }}
+        sx={{ "&:hover": { borderRadius: "10px" }, marginBottom: "20px" }}
       >
         <Box
           sx={{
@@ -130,18 +146,22 @@ function PDF({ open }) {
           <AddCircleIcon sx={{ color: "white", fontSize: "50px" }} />
         </Box>
       </IconButton>
-      <Typography
-        color={"white"}
-        variant="h5"
-        paddingBottom={"10px"}
-        paddingTop={"10px"}
-      >
-        Select PDF
-      </Typography>
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <Typography
+          color={"white"}
+          variant="h5"
+          paddingBottom={"10px"}
+          paddingTop={"10px"}
+        >
+          Select PDF
+        </Typography>
+        <IconButton onClick={() => setRefetchFiles(true)} sx={{ backgroundColor: "transparent", border: "none", color: "white", marginTop: "5px", marginLeft: `${open ? "43vw" : "63vw"}` }}>
+          <ReplayIcon />
+        </IconButton>
+      </div>
       <Stack
         direction={"row"}
         sx={{
-          backgroundColor: "#393E46",
           width: `${open ? "52vw" : "72vw"}`,
           padding: "10px",
           borderRadius: "10px",
@@ -152,36 +172,15 @@ function PDF({ open }) {
           overflowX: "auto",
         }}
       >
-        <PictureAsPdfIcon
-          sx={{ color: "white", fontSize: "50px", paddingLeft: "10px" }}
-        />
-        <PictureAsPdfIcon
-          sx={{ color: "white", fontSize: "50px", paddingLeft: "10px" }}
-        />
-        <PictureAsPdfIcon
-          sx={{ color: "white", fontSize: "50px", paddingLeft: "10px" }}
-        />
-        <PictureAsPdfIcon
-          sx={{ color: "white", fontSize: "50px", paddingLeft: "10px" }}
-        />
-        <PictureAsPdfIcon
-          sx={{ color: "white", fontSize: "50px", paddingLeft: "10px" }}
-        />
-        <PictureAsPdfIcon
-          sx={{ color: "white", fontSize: "50px", paddingLeft: "10px" }}
-        />
-        <PictureAsPdfIcon
-          sx={{ color: "white", fontSize: "50px", paddingLeft: "10px" }}
-        />
-        <PictureAsPdfIcon
-          sx={{ color: "white", fontSize: "50px", paddingLeft: "10px" }}
-        />
-        <PictureAsPdfIcon
-          sx={{ color: "white", fontSize: "50px", paddingLeft: "10px" }}
-        />
-        <PictureAsPdfIcon
-          sx={{ color: "white", fontSize: "50px", paddingLeft: "10px" }}
-        />
+        {fetchingPDFS && <CircularProgress sx={{ alignSelf: "center" }} />}
+        {pdfUrls.map((url, index) => 
+          <Button onClick={() => setUrl(url.downloadURL)} sx={{ display: "flex", flexDirection : "column", backgroundColor: "#393E46", width: "175px",  marginRight: "20px" }} key={index}>
+            <PictureAsPdfIcon
+              sx={{ color: "white", fontSize:  "150px" }}
+            />
+            <Typography noWrap sx={{ color: "white", width: "100%", marginTop: "7px" }}>{url.name}</Typography>
+          </Button>
+        )}
       </Stack>
       <Stack
         direction={"row"}
@@ -193,6 +192,7 @@ function PDF({ open }) {
         <Box display={"flex"} alignItems={"center"} flexDirection={"column"}>
           <Dialog
             sx={{ "& .MuiDialog-paper": {
+              color: "white",
               backgroundColor: "transparent",
               boxShadow: "none"
             }, "& .MuiBackdrop-root": {
@@ -205,9 +205,9 @@ function PDF({ open }) {
             <DialogContent sx={{ padding: 0, borderTop: 0, borderBottom: 0 }}>
                 <Document
                   onLoadSuccess={onDocumentLoadSuccess}
-                  file="https://firebasestorage.googleapis.com/v0/b/group-study-app-27681.appspot.com/o/IS.pdf?alt=media"
+                  file={url}
                   >
-                <Page canvasBackground="transparent" pageNumber={pageNumber} />
+                <Page loading={() => <div style={{ color: "white" }}>Loading PDF...</div>} canvasBackground="transparent" pageNumber={pageNumber} />
                 </Document>
             </DialogContent>
             <DialogActions sx={{ display: "flex", justifyContent: "center" }}>
@@ -216,7 +216,7 @@ function PDF({ open }) {
                   Page {pageNumber || (numPages ? 1 : "--")} of {numPages || "--"}
                 </Typography>
               </div>
-              <Tooltip title="Toggle syncing" arrow>
+              <Tooltip title={synced ? "Toggle syncing off" : "Toggle syncing on"} arrow>
                 <Button
                   onClick={() => setSynced((boolVal) => !boolVal)}
                   type="button"
