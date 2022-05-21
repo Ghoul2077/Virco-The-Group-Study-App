@@ -140,16 +140,16 @@ const Navbar = ({ val, openParent, tabParent, room }) => {
   };
 
   useEffect(() => {
-    setPublicRooms([]);
     const communityRef = collection(firestore, "communities");
     const q = query(
       communityRef,
       where("public", "==", true),
       orderBy("createdAt", "desc"),
       limit(10)
-    );
-    const querySnapshot = onSnapshot(q, (snapshot) => {
-      if (snapshot.docs.length !== 0) {
+      );
+      const querySnapshot = onSnapshot(q, (snapshot) => {
+        setPublicRooms([]);
+        if (snapshot.docs.length !== 0) {
         snapshot.docs.map((doc) => {
           setPublicRooms((room) => [...room, { id: doc.id, data: doc.data() }]);
         });
