@@ -1,4 +1,4 @@
-import { Divider, Stack, Typography } from "@mui/material";
+import { Button, Divider, Stack, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { doc, onSnapshot } from "firebase/firestore";
 import React, { useEffect, useRef, useState } from "react";
@@ -18,7 +18,7 @@ const Room = ({ open, serverInfo }) => {
   const { room } = useParams();
   const location = useLocation();
   const [path, setPath] = useState();
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState({});
   const [host, setHost] = useState("");
 
   const [memberData, setMemberData] = useState([]);
@@ -48,6 +48,7 @@ const Room = ({ open, serverInfo }) => {
 
   useEffect(() => {
     setHost("");
+    setUsers({});
 
     socket.emit("joinRoom", { roomId: room, username: user.displayName });
 
@@ -59,9 +60,9 @@ const Room = ({ open, serverInfo }) => {
       setUsers(users);
     });
 
-    socket.on("newHost", (newHostUsername) => {
-      console.log("Called");
-      setHost(newHostUsername);
+    socket.on("newHost", (hostData) => {
+      console.log(hostData);
+      setHost(hostData);
     });
 
     return () => {
@@ -72,7 +73,11 @@ const Room = ({ open, serverInfo }) => {
 
   useEffect(() => {
     if (host) {
-      toast.success(`${host} is the sync master`);
+      if(host?.socketId === socket.id) {
+        toast.success(`You are controlling the syncing`);
+      } else {
+        toast.success(`${host?.name} is controlling the syncing`);
+      }
     }
   }, [host]);
 
@@ -92,24 +97,30 @@ const Room = ({ open, serverInfo }) => {
         }}
       >
         <Stack paddingTop="10vh" paddingRight="0%">
-          <Typography color="white">Current Sync Host : {host}</Typography>
+          <Typography color="white">Sync Controller : {host?.name}</Typography>
           <Typography variant="h5" color={"white"} paddingTop="20px">
             Users Connected
           </Typography>
-          {users.map((username, index) => (
-            <Typography
+          {Object.keys(users).sort((val1, val2) => users[val1].localeCompare(users[val2])).map((socketId, index) => (
+            <Button 
+              disabled={host.socketId !== socket.id}
+              onClick={() => socket.emit("makeHost", { socketId })}
               key={index}
-              color="white"
               sx={{
+                textTransform: "none",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
                 bgcolor: "#272b30",
                 padding: "4px 4px 4px 7px",
                 borderRadius: "5px",
                 marginTop: "5px",
                 width: "15vw",
-              }}
-            >
-              {username}
+              }}>
+              <Typography color="white">
+                {users[socketId]}
             </Typography>
+            </Button>
           ))}
         </Stack>
         <Divider sx={{ color: "white" }} />
