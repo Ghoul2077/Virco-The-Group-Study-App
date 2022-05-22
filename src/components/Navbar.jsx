@@ -146,10 +146,10 @@ const Navbar = ({ val, openParent, tabParent, room }) => {
       where("public", "==", true),
       orderBy("createdAt", "desc"),
       limit(10)
-      );
-      const querySnapshot = onSnapshot(q, (snapshot) => {
-        setPublicRooms([]);
-        if (snapshot.docs.length !== 0) {
+    );
+    const querySnapshot = onSnapshot(q, (snapshot) => {
+      setPublicRooms([]);
+      if (snapshot.docs.length !== 0) {
         snapshot.docs.map((doc) => {
           setPublicRooms((room) => [...room, { id: doc.id, data: doc.data() }]);
         });
@@ -399,7 +399,7 @@ const Navbar = ({ val, openParent, tabParent, room }) => {
                   navigate(`/${item.data.community_name}/${item.id}`)
                 }
               >
-                {item.data.community_name}
+                {item.data.community_name}{" "}
               </Button>
             ))}
             {publicRooms.length === 0 && (

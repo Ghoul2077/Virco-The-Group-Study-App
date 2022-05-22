@@ -150,7 +150,7 @@ function CreateServer({ open }) {
               <ToggleButtonGroup
                 value={publicServer}
                 exclusive
-                color="secondary"
+                color="warning"
                 onChange={handleType}
                 aria-label="serverType"
               >
