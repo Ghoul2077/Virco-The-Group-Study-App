@@ -50,12 +50,12 @@ const cleanup = (roomName, id) => {
     rooms[roomName].host = newHostName;
     rooms[roomName].hostSocketId = newHostSocketId;
 
-    io.sockets.to(roomName).emit("newHost", rooms[roomName].host);
+    io.sockets.to(roomName).emit("newHost", { name: rooms[roomName].host, socketId: rooms[roomName].hostSocketId });
   }
 
   io.sockets
     .to(roomName)
-    .emit("roomData", Object.values(users[roomName] || []));
+    .emit("roomData", users[roomName] || []);
 };
 
 io.on("connection", (socket) => {
@@ -75,19 +75,22 @@ io.on("connection", (socket) => {
     }
 	
     // Every new joinee needs to know who the current host is
-    socket.emit("newHost", rooms[roomName].host);
+    socket.emit("newHost", { name: rooms[roomName].host, socketId: rooms[roomName].hostSocketId });
 
     // Tell all other clients that a new user has joined
     socket.broadcast.to(roomName).emit("newJoinee", username);
 
     // Broadcast all usernames to all the connected client
-    io.sockets.to(roomName).emit("roomData", Object.values(users[roomName]));
+    io.sockets.to(roomName).emit("roomData", users[roomName]);
     console.log(users);
   });
 
-  socket.on("makeHost", ({ username }) => {
-    setHost(roomName, username, socket.id);
-    socket.broadcast.to(roomName).emit("newHost", username);
+  socket.on("makeHost", ({ socketId }) => {
+    if(socketId) {
+      const username = users[roomName][socketId];
+      setHost(roomName, username, socketId);
+      io.sockets.to(roomName).emit("newHost", { name: username, socketId: socketId });
+    }
   });
 
   socket.on("sendMessage", ({ message }, callback) => {
