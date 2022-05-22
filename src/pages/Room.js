@@ -10,7 +10,8 @@ import { firestore } from "../config/firebase";
 import { useLogin } from "../context/LoginProvider";
 import RoomHome from "./RoomHome";
 
-const socket = socketIOClient(`https://group-study-app.herokuapp.com/`);
+// const socket = socketIOClient(`https://group-study-app.herokuapp.com/`);
+const socket = socketIOClient(`http://localhost:4000`);
 
 const Room = ({ open, serverInfo }) => {
   const { user } = useLogin();

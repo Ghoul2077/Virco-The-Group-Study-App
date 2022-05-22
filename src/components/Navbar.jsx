@@ -258,7 +258,7 @@ const Navbar = ({ val, openParent, tabParent, room }) => {
         {/* <Divider /> */}
         <Stack
           direction="column"
-          height={room ? null : "35vh"}
+          height={room ? null : "37vh"}
           spacing={2}
           sx={{ padding: "20px", overflow: "hidden" }}
         >

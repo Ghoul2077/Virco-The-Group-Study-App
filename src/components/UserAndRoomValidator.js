@@ -7,6 +7,8 @@ import {
   getDocs,
   onSnapshot,
   query,
+  serverTimestamp,
+  setDoc,
   where,
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
@@ -37,6 +39,7 @@ function UserAndRoomValidator({ open }) {
           const publicColl = collection(userDoc, "public_server");
           const publicDocRef = doc(publicColl, roomId);
           const privateDocRef = doc(privateColl, roomId);
+
           if (publicDocRef.length !== 0) {
             await deleteDoc(publicDocRef);
           }
@@ -51,6 +54,21 @@ function UserAndRoomValidator({ open }) {
             setServerInfo(data);
             if (data?.public) {
               setIsUserValidated(true);
+              const docRef = doc(firestore, "users", user.uid);
+              const collRef = collection(docRef, "public_server");
+              const serverDoc = doc(collRef, querySnapshot.id);
+              const serverExists = await getDoc(serverDoc);
+              if (!serverExists.exists()) {
+                await setDoc(doc(collRef, querySnapshot.id), {
+                  community_name: data.community_name,
+                  createdAt: data.createdAt,
+                  public: data.public,
+                  tags: data.tags,
+                  createdBy: data.createdBy,
+                  host: data.host,
+                  joinedOn: serverTimestamp(),
+                });
+              }
             } else {
               const isMember = data?.members.some(
                 (member) => member === user?.uid
@@ -78,7 +96,7 @@ function UserAndRoomValidator({ open }) {
   }, [user, roomId]);
 
   if (!isUserValidated) {
-    return <Loader loaderText="Connecting to the server" />
+    return <Loader loaderText="Connecting to the server" />;
   }
 
   return <Room open={open} serverInfo={serverInfo} />;

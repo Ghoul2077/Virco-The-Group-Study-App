@@ -100,15 +100,14 @@ function RoomHome({ serverInfo, open, memberData }) {
   }
 
   const handleInvite = (e) => {
-    e.preventDefault();
-    const userId = CheckUser();
-
-    userId.then((result) => {
-      if (result) {
-        AddUser(result);
-        setDisplayInvite(true);
-      }
-    });
+    // e.preventDefault();
+    // const userId = CheckUser();
+    // userId.then((result) => {
+    //   if (result) {
+    //     AddUser(result);
+    //     setDisplayInvite(true);
+    //   }
+    // });
   };
 
   const handleLeave = (e) => {
@@ -149,7 +148,6 @@ function RoomHome({ serverInfo, open, memberData }) {
       await updateDoc(communityRef, {
         host: newHostId,
       });
-      navigate("/");
     })();
   };
 

@@ -3,6 +3,7 @@ import {
   Avatar,
   Box,
   Button,
+  CircularProgress,
   IconButton,
   Popover,
   Stack,
@@ -21,27 +22,32 @@ import { useLogin } from "../context/LoginProvider";
 function Servers({ initialState, room }) {
   const { user } = useLogin();
   const [list, setList] = useState([]);
+  const [publicList, setPublicList] = useState([]);
+  const [privateList, setPrivateList] = useState([]);
   const [isVisible, setIsVisible] = useState(initialState);
+  const [loading, setLoading] = useState(true);
 
   function handleToggle() {
     setIsVisible((visible) => !visible);
   }
 
   useEffect(() => {
+    setLoading(true);
     const docRef = doc(firestore, "users", user.uid);
     const private_server = collection(docRef, "private_server");
     const public_server = collection(docRef, "public_server");
     const one = onSnapshot(private_server, (snap) => {
-      setList([]);
+      setPrivateList([]);
       snap.docs.map((doc) => {
         console.log(doc.id);
-        setList((list) => [...list, { id: doc.id, data: doc.data() }]);
+        setPrivateList((list) => [...list, { id: doc.id, data: doc.data() }]);
       });
     });
     const two = onSnapshot(public_server, (snap) => {
+      setPublicList([]);
       snap.docs.map((doc) => {
         console.log("public", doc.id);
-        setList((list) => [...list, { id: doc.id, data: doc.data() }]);
+        setPublicList((list) => [...list, { id: doc.id, data: doc.data() }]);
       });
     });
 
@@ -54,6 +60,13 @@ function Servers({ initialState, room }) {
       }
     };
   }, [user]);
+
+  useEffect(() => {
+    setList([...publicList, ...privateList]);
+    return () => {
+      setLoading(false);
+    };
+  }, [publicList, privateList]);
 
   console.log("list", list);
 
@@ -105,45 +118,56 @@ function Servers({ initialState, room }) {
         </Button>
         {/* <Typography sx={{ fontSize: "60px" }}>servers</Typography> */}
         <ScrollableDiv style={{ overflowX: "scroll", width: "100%" }}>
-          <Stack
-            direction="row"
-            display={"flex"}
-            justifyContent="center"
-            width={"100%"}
-          >
-            {list.map((item, i) => (
-              <Tooltip
-                key={i}
-                title={`${item.data.community_name}, Type : ${
-                  item.data.public ? "Public" : "Private"
-                }`}
-                arrow
-              >
-                <IconButton
-                  onClick={() =>
-                    navigate(`/${item.data.community_name}/${item.id}`)
-                  }
+          {loading ? (
+            <Box
+              display={"flex"}
+              justifyContent="center"
+              alignItems={"center"}
+              padding="10px"
+            >
+              <CircularProgress />
+            </Box>
+          ) : (
+            <Stack
+              direction="row"
+              display={"flex"}
+              justifyContent="center"
+              width={"100%"}
+            >
+              {list.map((item, i) => (
+                <Tooltip
+                  key={i}
+                  title={`${item.data.community_name}, Type : ${
+                    item.data.public ? "Public" : "Private"
+                  }`}
+                  arrow
                 >
-                  <Avatar
-                    alt={item.data.community_name.toUpperCase()}
-                    src="/broken-image.jpg"
-                    sx={{
-                      bgcolor: "#3D535F",
-                      width: "50px",
-                      height: "50px",
-                      fontSize: "30px",
-                      border: "2px solid red",
-                      "&:hover": {
-                        background: "#2A7299",
-                        border: "2px solid #0C2311",
-                      },
-                    }}
-                  />
-                </IconButton>
-              </Tooltip>
-            ))}
-            {list.length === 0 && <Typography>NO SERVERS JOINED</Typography>}
-          </Stack>
+                  <IconButton
+                    onClick={() =>
+                      navigate(`/${item.data.community_name}/${item.id}`)
+                    }
+                  >
+                    <Avatar
+                      alt={item.data.community_name.toUpperCase()}
+                      src="/broken-image.jpg"
+                      sx={{
+                        bgcolor: "#3D535F",
+                        width: "50px",
+                        height: "50px",
+                        fontSize: "30px",
+                        border: "2px solid red",
+                        "&:hover": {
+                          background: "#2A7299",
+                          border: "2px solid #0C2311",
+                        },
+                      }}
+                    />
+                  </IconButton>
+                </Tooltip>
+              ))}
+              {list.length === 0 && <Typography>NO SERVERS JOINED</Typography>}
+            </Stack>
+          )}
         </ScrollableDiv>
       </ServerList>
     </Box>
