@@ -149,7 +149,6 @@ function RoomHome({ serverInfo, open, memberData }) {
       await updateDoc(communityRef, {
         host: newHostId,
       });
-      navigate("/");
     })();
   };
 
