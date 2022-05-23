@@ -96,7 +96,7 @@ function PDF({ open }) {
   }, [file]);
 
   useEffect(() => {
-    if(refetchFiles) {
+    if (refetchFiles) {
       setFetchingPDFS(true);
       setPdfUrls([]);
       const storage = getStorage();
@@ -154,7 +154,7 @@ function PDF({ open }) {
         >
           Select PDF
         </Typography>
-        <IconButton onClick={() => setRefetchFiles(true)} sx={{ backgroundColor: "transparent", border: "none", color: "white", marginTop: "5px", marginLeft: `${open ? "43vw" : "63vw"}` }}>
+        <IconButton disabled={fetchingPDFS} onClick={() => setRefetchFiles(true)} sx={{ backgroundColor: "transparent", border: "none", color: "white", marginTop: "5px", marginLeft: `${open ? "43vw" : "63vw"}` }}>
           <ReplayIcon />
         </IconButton>
       </div>
