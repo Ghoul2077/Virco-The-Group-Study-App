@@ -12,7 +12,7 @@ import {
 import MuiDrawer from "@mui/material/Drawer";
 import MuiAppBar from "@mui/material/AppBar";
 import { Box } from "@mui/system";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useLogin } from "../context/LoginProvider";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -39,6 +39,8 @@ import {
   where,
 } from "firebase/firestore";
 import { firestore } from "../config/firebase";
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
+import toast from "react-hot-toast";
 
 const drawerWidth = 340;
 
@@ -121,6 +123,9 @@ const Navbar = ({ val, openParent, tabParent, room }) => {
   const [open, setOpen] = React.useState(true);
   const [showServ, setShowServ] = useState(true);
   const [publicRooms, setPublicRooms] = useState([]);
+  const [file, setFile] = useState(null);
+  const inputFile = useRef(null);
+  const [profileImage, setProfileImage] = useState("/broken-image.jpg");
 
   useEffect(() => {
     openParent(open);
@@ -175,6 +180,32 @@ const Navbar = ({ val, openParent, tabParent, room }) => {
     { name: "Video Channel 1", Icon: VideoLibraryIcon, url: "video" },
     { name: "Pdf Channel 1", Icon: PictureAsPdfIcon, url: "pdf" },
   ];
+
+  useEffect(() => {
+    if (file != null) {
+      const storage = getStorage();
+      const storageRef = ref(storage, `users/${user.uid}`);
+
+      const snapshot = uploadBytes(storageRef, file);
+      toast.promise(snapshot, {
+        loading: "Uploading....",
+        success: "Pic Uploaded",
+        error: "Check your internet connection",
+      });
+      setFile(null);
+    }
+  }, [file]);
+
+  useEffect(() => {
+    const storage = getStorage();
+    getDownloadURL(ref(storage, `users/${user.uid}`))
+      .then((url) => {
+        setProfileImage(url);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, [file]);
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -271,18 +302,34 @@ const Navbar = ({ val, openParent, tabParent, room }) => {
             }}
           >
             <Box>
-              <Avatar
-                // alt={user?.displayName}
-                src="/broken-image.jpg"
-                // src="/images/images.jpg"
-                sx={{
-                  bgcolor: "grey",
-                  border: "2px solid white",
-                  height: `${open ? "15vh" : "5vh"}`,
-                  width: `${open ? "15vh" : "5vh"}`,
-                  fontSize: `${open ? "4em" : "1em"}`,
-                }}
+              <input
+                type="file"
+                accept="image/*"
+                id="img"
+                onChange={(e) => setFile(e.target.files[0])}
+                ref={inputFile}
+                style={{ display: "none" }}
               />
+              <Button
+                sx={{ borderRadius: "50%" }}
+                onClick={() => inputFile.current.click()}
+              >
+                <Avatar
+                  // alt={user?.displayName}
+                  // src="/broken-image.jpg"
+                  src={profileImage}
+                  sx={{
+                    bgcolor: "grey",
+                    border: "2px solid white",
+                    height: `${open ? "15vh" : "5vh"}`,
+                    width: `${open ? "15vh" : "5vh"}`,
+                    fontSize: `${open ? "4em" : "1em"}`,
+                    "&:hover": {
+                      cursor: "pointer",
+                    },
+                  }}
+                />
+              </Button>
             </Box>
             {open && (
               <Box sx={{ paddingLeft: "20px" }}>
