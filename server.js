@@ -118,9 +118,9 @@ io.on("connection", (socket) => {
 
   // This is called whenever the host pdf page number changes, this change is
   // then broadcasted to all other connected users
-  socket.on("syncPages", (pageNumber) => {
+  socket.on("syncPages", ({ pageNumber, url }) => {
     if (rooms[roomName]?.hostSocketId === socket.id) {
-      socket.broadcast.to(roomName).emit("syncPages", pageNumber);
+      socket.broadcast.to(roomName).emit("syncPages", { pageNumber, url });
     }
   });
 

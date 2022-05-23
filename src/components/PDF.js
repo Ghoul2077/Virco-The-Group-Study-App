@@ -70,15 +70,21 @@ function PDF({ open }) {
 
   useEffect(() => {
     if (synced) {
-      socket.emit("syncPages", pageNumber);
+      socket.emit("syncPages", { pageNumber, url });
     }
-  }, [socket, pageNumber, synced]);
+  }, [socket, pageNumber, synced, url]);
 
   useEffect(() => {
-    socket.on("syncPages", (pageNumber) => {
-      setPageNumber(pageNumber);
+    socket.on("syncPages", ({ pageNumber, url : hostUrl }) => {
+      if(hostUrl === url && synced) {
+        setPageNumber(pageNumber);
+      }
     });
-  }, [socket]);
+
+    return () => {
+      socket.off("syncPages");
+    }
+  }, [socket, url, synced]);
 
   useEffect(() => {
     if (file != null) {
@@ -217,7 +223,7 @@ function PDF({ open }) {
                   Page {pageNumber || (numPages ? 1 : "--")} of {numPages || "--"}
                 </Typography>
               </div>
-              <Tooltip title={synced ? "Toggle syncing off" : "Toggle syncing on"} arrow>
+              <Tooltip title={synced ? "Click to toggle syncing off" : "Click to toggle syncing on"} arrow>
                 <Button
                   onClick={() => setSynced((boolVal) => !boolVal)}
                   type="button"
