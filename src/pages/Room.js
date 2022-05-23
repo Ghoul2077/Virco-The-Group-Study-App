@@ -11,6 +11,7 @@ import { useLogin } from "../context/LoginProvider";
 import RoomHome from "./RoomHome";
 
 const socket = socketIOClient(`https://group-study-app.herokuapp.com/`);
+// const socket = socketIOClient(`http://localhost:4000`);
 
 const Room = ({ open, serverInfo }) => {
   const { user } = useLogin();
@@ -72,7 +73,7 @@ const Room = ({ open, serverInfo }) => {
 
   useEffect(() => {
     if (host) {
-      if(host?.socketId === socket.id) {
+      if (host?.socketId === socket.id) {
         toast.success(`You are controlling the syncing`);
       } else {
         toast.success(`${host?.name} is controlling the syncing`);
@@ -80,6 +81,7 @@ const Room = ({ open, serverInfo }) => {
     }
   }, [host]);
 
+  console.log(users);
   return (
     <div>
       <Box
@@ -100,27 +102,51 @@ const Room = ({ open, serverInfo }) => {
           <Typography variant="h5" color={"white"} paddingTop="20px">
             Users Connected
           </Typography>
-          {Object.keys(users).sort((val1, val2) => users[val1].localeCompare(users[val2])).map((socketId, index) => (
-            <Button 
-              disabled={host.socketId !== socket.id}
-              onClick={() => socket.emit("makeHost", { socketId })}
-              key={index}
-              sx={{
-                textTransform: "none",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                bgcolor: "#272b30",
-                padding: "4px 4px 4px 7px",
-                borderRadius: "5px",
-                marginTop: "5px",
-                width: "15vw",
-              }}>
-              <Typography color="white">
-                {users[socketId]}
-            </Typography>
-            </Button>
-          ))}
+          {Object.keys(users)
+            .sort((val1, val2) => users[val1].localeCompare(users[val2]))
+            .map((socketId, index) => (
+              <Stack
+                direction={"row"}
+                key={index}
+                sx={{
+                  textTransform: "none",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  bgcolor: "#272b30",
+                  padding: "4px 4px 4px 7px",
+                  borderRadius: "5px",
+                  marginTop: "5px",
+                  width: "15vw",
+                }}
+              >
+                <Typography color="white" paddingLeft={"3px"}>
+                  {users[socketId]}
+                </Typography>
+                {host.socketId === socketId && (
+                  <Typography color="white" paddingRight={"10px"}>
+                    Host
+                  </Typography>
+                )}
+                {host.socketId === socket.id && (
+                  <Button
+                    onClick={() => socket.emit("makeHost", { socketId })}
+                    size="small"
+                    sx={{
+                      textTransform: "none",
+                      bgcolor: "#3D6974",
+                      margin: "5px",
+                      color: "white",
+                      display: `${
+                        host.socketId === socketId ? "none" : "inherit"
+                      }`,
+                    }}
+                  >
+                    Make Host
+                  </Button>
+                )}
+              </Stack>
+            ))}
         </Stack>
         <Divider sx={{ color: "white" }} />
       </Box>
