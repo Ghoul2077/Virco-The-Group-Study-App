@@ -118,7 +118,7 @@ function PDF({ open }) {
       });
       setRefetchFiles(false);
     }
-  }, [refetchFiles]);
+  }, [refetchFiles, fetchingPDFS]);
 
   return (
     <div>
