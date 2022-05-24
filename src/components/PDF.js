@@ -102,7 +102,7 @@ function PDF({ open }) {
   }, [file]);
 
   useEffect(() => {
-    if (refetchFiles) {
+    if (refetchFiles && !fetchingPDFS) {
       setFetchingPDFS(true);
       setPdfUrls([]);
       const storage = getStorage();
