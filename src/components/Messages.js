@@ -36,12 +36,16 @@ function Messages({ open }) {
     setMsg("");
     setMessages([]);
 
-    socket.emit("getMessages");
-
-    socket.on("messagesBroadcast", (messages) => {
-      setMessages(messages);
+    socket.on("messagesBroadcast", (message) => {
+      setMessages(messages => [...messages, message]);
       messageBoxRef.current?.scrollTo(0, messageBoxRef.current?.scrollHeight);
     });
+
+    socket.on("hydrateMessages", (messages) => {
+      setMessages(messages);
+    });
+
+    socket.emit("getMessages");
   }, [socket]);
 
   //   useEffect(() => {
