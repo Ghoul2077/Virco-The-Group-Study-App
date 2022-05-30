@@ -15,7 +15,7 @@ const socket = socketIOClient(`https://group-study-app.herokuapp.com/`);
 
 const Room = ({ open, serverInfo }) => {
   const { user } = useLogin();
-  const { room } = useParams();
+  const { roomId } = useParams();
   const location = useLocation();
   const [path, setPath] = useState();
   const [users, setUsers] = useState({});
@@ -50,7 +50,7 @@ const Room = ({ open, serverInfo }) => {
     setHost("");
     setUsers({});
 
-    socket.emit("joinRoom", { roomId: room, username: user.displayName });
+    socket.emit("joinRoom", { roomId, username: user.displayName });
 
     socket.on("newJoinee", (username) =>
       toast.success(`${username} just joined the room`)
@@ -69,7 +69,7 @@ const Room = ({ open, serverInfo }) => {
       socket.removeAllListeners();
       socket.emit("leaveRoom");
     };
-  }, [room, user.displayName]);
+  }, [roomId, user.displayName]);
 
   useEffect(() => {
     if (host) {
