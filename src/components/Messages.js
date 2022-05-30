@@ -44,8 +44,6 @@ function Messages({ open }) {
     socket.on("hydrateMessages", (messages) => {
       setMessages(messages);
     });
-
-    socket.emit("getMessages");
   }, [socket]);
 
   //   useEffect(() => {

@@ -1,3 +1,18 @@
+require('dotenv').config();
+
+const { initializeApp } = require("firebase/app");
+const { getFirestore, doc, updateDoc, getDoc } = require("firebase/firestore");
+
+const firebaseApp = initializeApp({ 
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_KEY,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+});
+const firestoreDB = getFirestore(firebaseApp);
+
 const express = require("express");
 var cors = require("cors");
 const app = express();
@@ -31,10 +46,10 @@ const setHost = (roomName, username, id) => {
   };
 };
 
-const cleanup = (roomName, id) => {
+const cleanup = async (roomName, roomId, socketId) => {
   // Delete the current user from the list and then broadcast new info to all clients
   if (users[roomName]) {
-    delete users[roomName][id];
+    delete users[roomName][socketId];
   }
 
   // If the deleted user was the current host then set a new random host and broadcast
@@ -42,22 +57,28 @@ const cleanup = (roomName, id) => {
   if (users[roomName] && !Object.keys(users[roomName]).length) {
     delete users[roomName];
     delete rooms[roomName];
+
+    const roomDataRef = doc(firestoreDB, "communities", roomId);
+    await updateDoc(roomDataRef, {
+      messages: messages[roomName]
+    });
+
     delete messages[roomName];
-  } else if (rooms[roomName]?.hostSocketId === id) {
+  } else if (rooms[roomName]?.hostSocketId === socketId) {
     const newHostSocketId = Object.keys(users[roomName])[0];
     const newHostName = users[roomName][newHostSocketId];
 
     rooms[roomName].host = newHostName;
     rooms[roomName].hostSocketId = newHostSocketId;
-
+    
     io.sockets.to(roomName).emit("newHost", { name: rooms[roomName].host, socketId: rooms[roomName].hostSocketId });
   }
 
   io.sockets
-    .to(roomName)
+  .to(roomName)
     .emit("roomData", users[roomName] || []);
-};
-
+  };
+  
 io.on("connection", (socket) => {
   const roomId = socket.handshake.query["roomId"];
   const roomName = "room-" + roomId;
@@ -73,7 +94,18 @@ io.on("connection", (socket) => {
     if (rooms[roomName] === undefined) {
       setHost(roomName, username, socket.id);
     }
-	
+
+    if (messages[roomName] === undefined) {
+      const roomDataRef = doc(firestoreDB, "communities", roomId);
+      getDoc(roomDataRef).then((snapshot) => {
+        const roomData = snapshot.data();
+        messages[roomName] = roomData.messages ?? [];
+        socket.emit("hydrateMessages", messages[roomName]);
+      });
+    } else {
+      socket.emit("hydrateMessages", messages[roomName]);
+    }
+
     // Every new joinee needs to know who the current host is
     socket.emit("newHost", { name: rooms[roomName].host, socketId: rooms[roomName].hostSocketId });
 
@@ -109,13 +141,6 @@ io.on("connection", (socket) => {
     if (callback) callback();
     console.log(messages[roomName]);
   });
-  
-  socket.on("getMessages", () => {
-    console.log(roomName);
-    if (messages[roomName] !== undefined) {
-      socket.emit("hydrateMessages", messages[roomName]);
-    } 
-  })
 
   // This is called whenever the host pdf page number changes, this change is
   // then broadcasted to all other connected users
@@ -145,14 +170,14 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("leaveRoom", (callback) => {
-    cleanup(roomName, socket.id);
+  socket.on("leaveRoom", async (callback) => {
+    await cleanup(roomName, roomId, socket.id);
     if (callback) callback();
     console.log("Leaving room");
   });
 
-  socket.on("disconnect", () => {
-    cleanup(roomName, socket.id);
+  socket.on("disconnect", async () => {
+    await cleanup(roomName, roomId, socket.id);
     console.log("User disconnected");
   });
 });
