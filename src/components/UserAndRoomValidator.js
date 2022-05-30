@@ -96,7 +96,7 @@ function UserAndRoomValidator({ open }) {
       const socket = socketIOClient(`https://group-study-app.herokuapp.com/`, { query: `roomId=${roomId}` });
       setSocketRef(socket);
     }
-  }, [isUserValidated])
+  }, [isUserValidated, roomId])
   
 
   if (!isUserValidated || socketRef === undefined) {
