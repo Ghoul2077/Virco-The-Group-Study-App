@@ -33,7 +33,7 @@ function UserAndRoomValidator({ open }) {
       const communitiesRef = doc(firestore, "communities", roomId);
       // const q = query(communitiesRef, doc(roomId));
       querySnapshot = onSnapshot(communitiesRef, async (querySnapshot) => {
-        if (!querySnapshot.exists()) {
+        if (!querySnapshot.exists() || querySnapshot.data().community_name !== room) {
           const userDoc = doc(firestore, "users", user.uid);
           const privateColl = collection(userDoc, "private_server");
           const publicColl = collection(userDoc, "public_server");
@@ -49,7 +49,6 @@ function UserAndRoomValidator({ open }) {
           toast.error("Room does not exist");
           navigate(`/`);
         } else {
-          if (querySnapshot.data().community_name === room) {
             const data = querySnapshot.data();
             setServerInfo(data);
             if (data?.public) {
@@ -81,10 +80,6 @@ function UserAndRoomValidator({ open }) {
                 navigate(`/`);
               }
             }
-          } else {
-            toast.error("Room does not exist");
-            navigate(`/`);
-          }
         }
       });
     })();
