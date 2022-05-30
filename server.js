@@ -62,7 +62,10 @@ io.on("connection", (socket) => {
   let roomName;
 
   socket.on("joinRoom", ({ roomId, username }) => {
+    // Move this statement outside i.e initiate roomName on connection established.
+    // This otherwise causes bug where socket handlers are called before roomName is initialized 
     roomName = "room-" + roomId;
+    
     socket.join(roomName);
     if (users[roomName] === undefined) {
       users[roomName] = {};
@@ -104,15 +107,16 @@ io.on("connection", (socket) => {
       sender: senderUsername,
       message,
     });
-    io.sockets.to(roomName).emit("messagesBroadcast", messages[roomName]);
+    io.sockets.to(roomName).emit("messagesBroadcast", messages[roomName].at(-1));
 
     if (callback) callback();
     console.log(messages[roomName]);
   });
   
   socket.on("getMessages", () => {
-	if (messages[roomName] !== undefined) {
-	  socket.emit("messagesBroadcast", messages[roomName]);
+    console.log(roomName);
+    if (messages[roomName] !== undefined) {
+      socket.emit("hydrateMessages", messages[roomName]);
     } 
   })
 
