@@ -59,13 +59,10 @@ const cleanup = (roomName, id) => {
 };
 
 io.on("connection", (socket) => {
-  let roomName;
+  const roomId = socket.handshake.query["roomId"];
+  const roomName = "room-" + roomId;
 
   socket.on("joinRoom", ({ roomId, username }) => {
-    // Move this statement outside i.e initiate roomName on connection established.
-    // This otherwise causes bug where socket handlers are called before roomName is initialized 
-    roomName = "room-" + roomId;
-    
     socket.join(roomName);
     if (users[roomName] === undefined) {
       users[roomName] = {};

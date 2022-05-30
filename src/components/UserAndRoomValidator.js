@@ -1,4 +1,3 @@
-import { async } from "@firebase/util";
 import {
   collection,
   deleteDoc,
@@ -13,6 +12,7 @@ import {
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import socketIOClient from "socket.io-client";
 import { useNavigate, useParams } from "react-router-dom";
 import Loader from "./Loader";
 import { firestore } from "../config/firebase";
@@ -25,6 +25,7 @@ function UserAndRoomValidator({ open }) {
   const navigate = useNavigate();
   const [serverInfo, setServerInfo] = useState();
   const [isUserValidated, setIsUserValidated] = useState(false);
+  const [socketRef, setSocketRef] = useState(undefined);
   // console.log(roomId);
 
   useEffect(() => {
@@ -90,11 +91,19 @@ function UserAndRoomValidator({ open }) {
     };
   }, [user, roomId]);
 
-  if (!isUserValidated) {
+  useEffect(() => {
+    if(isUserValidated) {
+      const socket = socketIOClient(`https://group-study-app.herokuapp.com/`, { query: `roomId=${roomId}` });
+      setSocketRef(socket);
+    }
+  }, [isUserValidated])
+  
+
+  if (!isUserValidated || socketRef === undefined) {
     return <Loader loaderText="Connecting to the server" />;
   }
 
-  return <Room open={open} serverInfo={serverInfo} />;
+  return <Room socket={socketRef} open={open} serverInfo={serverInfo} />;
 }
 
 export default UserAndRoomValidator;
