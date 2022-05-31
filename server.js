@@ -176,13 +176,13 @@ io.on("connection", (socket) => {
   });
 
   socket.on("leaveRoom", async (callback) => {
-    cleanup(roomName, roomId, socket.id);
+    cleanup(roomName, roomName?.slice(5), socket.id);
     if (callback) callback();
     console.log("Leaving room");
   });
 
   socket.on("disconnect", async () => {
-    cleanup(roomName, roomId, socket.id);
+    cleanup(roomName, roomName?.slice(5), socket.id);
     console.log("User disconnected");
   });
 });
