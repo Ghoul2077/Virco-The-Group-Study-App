@@ -46,7 +46,7 @@ const setHost = (roomName, username, id) => {
   };
 };
 
-const cleanup = async (roomName, roomId, socketId) => {
+const cleanup = (roomName, roomId, socketId) => {
   // Delete the current user from the list and then broadcast new info to all clients
   if (users[roomName]) {
     delete users[roomName][socketId];
@@ -58,10 +58,12 @@ const cleanup = async (roomName, roomId, socketId) => {
     delete users[roomName];
     delete rooms[roomName];
 
-    const roomDataRef = doc(firestoreDB, "communities", roomId);
-    await updateDoc(roomDataRef, {
-      messages: messages[roomName]
-    });
+    if (messages[roomName] !== undefined) {
+      const roomDataRef = doc(firestoreDB, "communities", roomId);
+      updateDoc(roomDataRef, {
+        messages: messages[roomName]
+      });
+    }
 
     delete messages[roomName];
   } else if (rooms[roomName]?.hostSocketId === socketId) {
@@ -70,15 +72,15 @@ const cleanup = async (roomName, roomId, socketId) => {
 
     rooms[roomName].host = newHostName;
     rooms[roomName].hostSocketId = newHostSocketId;
-    
+
     io.sockets.to(roomName).emit("newHost", { name: rooms[roomName].host, socketId: rooms[roomName].hostSocketId });
   }
 
   io.sockets
-  .to(roomName)
+    .to(roomName)
     .emit("roomData", users[roomName] || []);
-  };
-  
+};
+
 io.on("connection", (socket) => {
   const roomId = socket.handshake.query["roomId"];
   const roomName = "room-" + roomId;
@@ -171,13 +173,13 @@ io.on("connection", (socket) => {
   });
 
   socket.on("leaveRoom", async (callback) => {
-    await cleanup(roomName, roomId, socket.id);
+    cleanup(roomName, roomId, socket.id);
     if (callback) callback();
     console.log("Leaving room");
   });
 
   socket.on("disconnect", async () => {
-    await cleanup(roomName, roomId, socket.id);
+    cleanup(roomName, roomId, socket.id);
     console.log("User disconnected");
   });
 });
