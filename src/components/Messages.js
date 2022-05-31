@@ -13,9 +13,9 @@ import { useLogin } from "../context/LoginProvider";
 
 function Messages({ open }) {
   const { user } = useLogin();
+  const { socket, fetchedMessages } = useOutletContext();
   const [msg, setMsg] = useState("");
-  const [messages, setMessages] = useState([]);
-  const { socket } = useOutletContext();
+  const [messages, setMessages] = useState(fetchedMessages ?? []);
   const messageBoxRef = useRef(null);
   //   const [profileImage, setProfileImage] = useState("/broken-image.jpg");
 
@@ -33,9 +33,6 @@ function Messages({ open }) {
   }
 
   useEffect(() => {
-    setMsg("");
-    setMessages([]);
-
     socket.on("messagesBroadcast", (message) => {
       setMessages(messages => [...messages, message]);
       messageBoxRef.current?.scrollTo(0, messageBoxRef.current?.scrollHeight);

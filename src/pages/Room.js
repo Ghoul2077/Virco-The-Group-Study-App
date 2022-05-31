@@ -17,9 +17,9 @@ const Room = ({ open, serverInfo }) => {
   const { user } = useLogin();
   const { roomId } = useParams();
   const location = useLocation();
-  const [path, setPath] = useState();
   const [users, setUsers] = useState({});
   const [host, setHost] = useState("");
+  const [messages, setMessages] = useState([]);
 
   const [memberData, setMemberData] = useState([]);
 
@@ -43,10 +43,6 @@ const Room = ({ open, serverInfo }) => {
   }, [serverInfo]);
 
   useEffect(() => {
-    setPath(location.pathname.split("/")[2]);
-  }, [location]);
-
-  useEffect(() => {
     setHost("");
     setUsers({});
 
@@ -63,6 +59,11 @@ const Room = ({ open, serverInfo }) => {
     socket.on("newHost", (hostData) => {
       console.log(hostData);
       setHost(hostData);
+    });
+
+    socket.on("hydrateMessages", (messages) => {
+      console.log("Hydrating Messages ", Object(messages));
+      setMessages(messages);
     });
 
     return () => {
@@ -161,7 +162,7 @@ const Room = ({ open, serverInfo }) => {
         }}
       >
         <div style={{ display: "inherit" }}>
-          <Outlet context={{ socket }} />
+          <Outlet context={{ socket, fetchedMessages: messages }} />
         </div>
         {(location.pathname.split("/")[3] === "" ||
           location.pathname.split("/")[3] === undefined) && (
