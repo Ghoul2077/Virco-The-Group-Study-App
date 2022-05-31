@@ -4,15 +4,20 @@ import { doc, onSnapshot } from "firebase/firestore";
 import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
+import socketIOClient from "socket.io-client";
 import Servers from "../components/Servers";
 import { firestore } from "../config/firebase";
 import { useLogin } from "../context/LoginProvider";
 import RoomHome from "./RoomHome";
 
-const Room = ({ socket, open, serverInfo }) => {
+const socket = socketIOClient(`https://group-study-app.herokuapp.com/`);
+// const socket = socketIOClient(`http://localhost:4000`);
+
+const Room = ({ open, serverInfo }) => {
   const { user } = useLogin();
   const { roomId } = useParams();
   const location = useLocation();
+  const [path, setPath] = useState();
   const [users, setUsers] = useState({});
   const [host, setHost] = useState("");
 
@@ -36,6 +41,10 @@ const Room = ({ socket, open, serverInfo }) => {
       docSnap.map((unsubscribe) => unsubscribe());
     };
   }, [serverInfo]);
+
+  useEffect(() => {
+    setPath(location.pathname.split("/")[2]);
+  }, [location]);
 
   useEffect(() => {
     setHost("");
